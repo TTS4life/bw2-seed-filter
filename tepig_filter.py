@@ -144,18 +144,17 @@ def get_init_frame_id(seed, challenge_mode = False):
 
 	return count
 
-def main():
-	outputDir=dir+"/test.txt"
+def main(input_file, output_file):
 
 	try:
-		seedLst = open(path, "r+", encoding="Shift-JIS")
+		seedLst = open(input_file, "r+", encoding="Shift-JIS")
 	except IOError:
 		print("Error attempting to open file:", path)
 		exit()
 
 	seedLst.readline()
 	try:
-		output = open(outputDir,"w",encoding="UTF-8")
+		output = open(output_file,"w",encoding="UTF-8")
 	except IOError:
 		print("error trying to write to file:", outputDir)
 		exit()
@@ -203,5 +202,3 @@ def main():
 	seedLst.close()
 	output.close()
 
-if __name__ == '__main__':
-	main()
