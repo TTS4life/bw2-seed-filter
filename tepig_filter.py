@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 import os
+import tkinter as tk 
+from tkinter import ttk
+from typing import Optional
 
 dir = os.getcwd()
 path = dir+"/result.txt"
@@ -144,7 +147,37 @@ def get_init_frame_id(seed, challenge_mode = False):
 
 	return count
 
-def main(input_file, output_file):
+def processSeed(input_seed, ivframe, month):
+	print(f"seed: {input_seed}, ivframe: {ivframe}")
+
+	try:
+		seed = {
+			"seed": int(input_seed, 16),
+			"ivframe": int(ivframe),
+			"month": int(month)
+		}
+	
+
+		seed["NMTID"] = getTID(seed["seed"], seed["ivframe"])
+		seed["NMPASS"] = getPassword(seed["NMTID"])
+
+		seed["CMTID"] = getTID(seed["seed"], seed["ivframe"], True)
+		seed["CMPASS"] = getPassword(seed["CMTID"])
+
+		seed["ducks"] = getDucks(seed)
+		seed["birds"] = getBirds(seed)
+
+		print("formatting output for " + str(seed))
+		output = format_output(seed)
+
+	except Exception as ex:
+		raise(ex)
+
+	return output
+
+
+
+def processFile(input_file, output_file):
 
 	try:
 		seedLst = open(input_file, "r+", encoding="Shift-JIS")
@@ -156,7 +189,7 @@ def main(input_file, output_file):
 	try:
 		output = open(output_file,"w",encoding="UTF-8")
 	except IOError:
-		print("error trying to write to file:", outputDir)
+		print("error trying to write to file:", output_file)
 		exit()
 
 	for line in seedLst:
@@ -202,3 +235,25 @@ def main(input_file, output_file):
 	seedLst.close()
 	output.close()
 
+def format_output(seed):
+	
+	output = f"{seed['seed']}\n"
+	output += f"{seed['ivframe']}\n"
+	output += f"{seed['month']}\n"
+	output += f"TID: {seed['NMTID']} ({seed['NMPASS']})\n"
+	output += f"CMTID: {seed['CMTID']} ({seed['CMPASS']})\n"
+	
+	for bird in seed['birds']:
+		tmp = str(bird).replace("\t", "   ")
+		output += f"{tmp}\n"
+
+	for duck in seed['ducks']:
+		tmp = str(duck).replace("\t", "   ")
+		output += f"{tmp}\n"
+
+
+	return output
+
+
+def main(input_file, output_file):
+	processFile(input_file, output_file)

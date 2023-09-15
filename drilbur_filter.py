@@ -103,7 +103,7 @@ def dustSearch(seed,min,max):
     rng = rngOf(seed,min-1)
     for x in range(min,max+1):
         rng = rngAdvance(rng)
-        if rng>>60 == 0:
+        if ((rng >> 32)  * 1000) >> 32 < 100:
             clouds.append(x)
     return clouds
 
