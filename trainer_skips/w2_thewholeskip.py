@@ -223,19 +223,11 @@ def wholeskip(outfile):
  
     file = open(outfile, "w")
 
-    
-    if user_keypress == 1:
-        key_presses = keypresses_3_4
-    else:
-        key_presses = keypresses_2
-
-
-    for presses in key_presses:
-
-        if illegal_keypresses(presses[1]):
-            continue
-
-        for time in times:
+    for time in times:
+        for presses in keypresses:
+            if illegal_keypresses(presses[1]):
+                continue
+            
             sha1.set_button(presses[0])
             sha1.set_time(*time)
             seed = sha1.hash_seed(precompute)
@@ -262,8 +254,8 @@ def main(version, language, year, month, day, dow, mac, timer0, outfile):
     user_dow = int(dow)
     user_mac = int(mac, 16)
     timer0 = int(timer0, 16)
-    user_hour = 21
-    user_min = 10
+    user_hour = 17
+    user_min = 8
     #user_keypress = int(input("Enter keypress choice. Enter 0 for 0-2 keypresses, enter 1 for 3-4 keypresses"))
     #user_hour = int(input("Enter hour you are at near skip"))
     #user_min = int(input("enter minute near skip"))
@@ -274,7 +266,6 @@ def main(version, language, year, month, day, dow, mac, timer0, outfile):
 
     print("generating RNG...")
     sha1 = SHA1(version = version, language = language, ds_type=DSType.DS, mac = user_mac, soft_reset=False, v_frame= 8, gx_state=6)
-    timer0 = 0x10F9
     sha1.set_timer0(timer0, 0x82)
     date = (user_year, user_month, user_day, user_dow)
     sha1.set_date(*date)

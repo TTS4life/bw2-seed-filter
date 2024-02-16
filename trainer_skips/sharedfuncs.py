@@ -13,8 +13,8 @@ ranges = (
 
 def compute_times(user_hour, user_min):
     times = []
-    for i in range(max(user_hour - 8, 0), min(user_hour + 8, 24)):
-        for j in range(max(user_min - 10, 0), min(user_min + 10, 60)):
+    for i in range(max(user_hour - 2, 0), min(user_hour + 2, 24)):
+        for j in range(max(user_min - 5, 0), min(user_min + 5, 60)):
            for k in range(5,7):
                   time1 = (i, j, k)
                   times.append(time1)

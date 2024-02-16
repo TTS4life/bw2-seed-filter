@@ -2,3 +2,4 @@ __pychache__/
 result.txt
 test.txt
 __pycache__
+*.txt

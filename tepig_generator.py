@@ -16,15 +16,15 @@ times = []
 
 #Edit these parameters for your DS
 
-month = 5
-day = 19
-year = 2049
-dow = 3
+month = 9
+day = 18
+year = 2048
+dow = 5
 
-timer0 = 0x10f2
-ds_mac = 0x9bf46fe18
+timer0 = 0x10f7
+ds_mac = 0x9BF6D93CE # Sugar - 9BF6D93CE
 
-nature_search = 'Rash'
+nature_search = 'Naughty'
 
 file = None
 
@@ -115,34 +115,40 @@ def pokeGen(seed,frame):
 	return [appear,frame,isEncounter,getLandSlot(sel),natures[natsel],ability]
 
 def getBirds(seed):
-	table1 = ["lv2 pidove","lv2 sewaddle","lv3 patrat", "lv3 purrloin", "lv3 patrat", "lv3 sewaddle", "lv4 pidove", "lv4 sewaddle", "lv4 purrloin", "lv3 sunkern", "lv4 sunkern", "lv4 sunkern"]
-	table3 = ["lv2 pidove","lv2 sewaddle","lv3 patrat", "lv3 purrloin", "lv3 patrat", "lv3 sewaddle", "lv4 pidove", "lv4 sewaddle", "lv4 purrloin", "lv4 sunkern", "lv4 purrloin", "lv4 sunkern"]
+	route_20_summer = ["lv2 sunkern","lv2 sewaddle","lv3 patrat", "lv3 purrloin", "lv3 patrat", "lv3 sewaddle", "lv4 pidove", "lv4 sewaddle", "lv4 purrloin", "lv3 sunkern", "lv4 sunkern", "lv4 sunkern"]
+	route_20_encounters = ["lv2 pidove","lv2 sewaddle","lv3 patrat", "lv3 purrloin", "lv3 patrat", "lv3 sewaddle", "lv4 pidove", "lv4 sewaddle", "lv4 purrloin", "lv4 sunkern", "lv4 purrloin", "lv4 sunkern"]
 	birds  = [ ]
-	for x in range(frame_entering_route20,frame_exiting_route20):
-		res = pokeGen(seed["SEED"], x)
-		if res[0] and res[3]==0 and res[4] not in [natures[1],natures[11],natures[16],natures[21]]:
-			if seed["MONTH"] % 4 == 3:
-				if res[2]<5:
-					birds.append(str(res[1])+"\t"+table3[int(res[3])]+"\t"+res[4]+"\t"+str(res[5])+" Low")
-				else:
-					birds.append(str(res[1])+"\t"+table3[int(res[3])]+"\t"+res[4]+"\t"+str(res[5])+" High")
-			if seed["MONTH"] %4 == 1:
-				if res[2]<5:
-					birds.append(str(res[1])+"\t"+table1[int(res[3])]+"\t"+res[4]+"\t"+str(res[5])+" Low")
-				else:
-					birds.append(str(res[1])+"\t"+table1[int(res[3])]+"\t"+res[4]+"\t"+str(res[5])+" High")
+	pidove_slots = []
+	
+	if(seed["MONTH"] % 4 == 2): #summer
+		pidove_slots = [ 6 ]
+		slots = route_20_summer
+	else:
+		pidove_slots = [ 0, 6 ]
+		slots = route_20_encounters
+	
+	for frame in range(frame_entering_route20,frame_exiting_route20):
+		res = pokeGen(seed["SEED"], frame)
+		
+		if(res[0] #encounterable 
+	 		and res[3] in pidove_slots ):	
+			check_type = "Low" if res[2]<5 else "High"
+
+			birds.append(f"{res[1]}\t{slots[res[3]]}\t{res[4]}\t{res[5]}\t{check_type}")
+
+
 	return birds
 
 def getDucks(seed):
-	table2 = ["lv4 lillipup","lv5 azurill","lv5 patrat", "lv5 mareep", "lv5 lillipup", "lv5 psyduck", "lv6 lillipup", "lv7 pidove", "lv5 riolu", "lv7 lillpup", "lv7 riolu", "lv7 lillipup"]
+	ranch_encounter_slots = ["lv4 lillipup","lv5 azurill","lv5 patrat", "lv5 mareep", "lv5 lillipup", "lv5 psyduck", "lv6 lillipup", "lv7 pidove", "lv5 riolu", "lv7 lillpup", "lv7 riolu", "lv7 lillipup"]
 	ducks=[]
 	for x in range(frame_entering_ranch,frame_exiting_ranch):
 		res = pokeGen(seed["SEED"], x)
 		if res[0] and res[3]==5 and res[5]==0:
 			if res[2]<5:
-				ducks.append(str(res[1])+"\t"+table2[int(res[3])]+"\t"+res[4]+"\t"+str(res[5])+" Low")
+				ducks.append(str(res[1])+"\t"+ranch_encounter_slots[int(res[3])]+"\t"+res[4]+"\t"+str(res[5])+" Low")
 			else:
-				ducks.append(str(res[1])+"\t"+table2[int(res[3])]+"\t"+res[4]+"\t"+str(res[5])+" High")
+				ducks.append(str(res[1])+"\t"+ranch_encounter_slots[int(res[3])]+"\t"+res[4]+"\t"+str(res[5])+" High")
 	return ducks
 
 def get_init_frame_id(seed, challenge_mode = False):
@@ -363,37 +369,48 @@ def mine_seeds(sha1, precompute):
 			sha1.set_time(*time)
 
 			seed["SEED"] = sha1.hash_seed(precompute)
-
-			seed["TEPIG_INFO"] = check_seed_for_tepig(seed["SEED"])
-
-			#Make these checks as early as possible to save time
-			if(seed["TEPIG_INFO"] is None or len(seed["TEPIG_INFO"][2]) < 1):
-				continue
-			
-			seed["R6GROTTO"] = grotto_check(seed["SEED"])
-			if(len(seed["R6GROTTO"]) < 1):
-				continue
-			
 			seed["MONTH"] = month
-			seed["DUCKS"] = getDucks(seed)
-			seed["DOVES"] = getBirds(seed)
 
-			if(len(seed["DUCKS"]) == 0 or len(seed["DOVES"]) == 0):
+			seed = gather_seed_info(seed)
+
+			if seed is None:
 				continue
-
+			
 			seed["TIMER0"] = timer0
 			seed["TIME"] = time
 			seed["KEYPRESSES"] = presses[1]
 
-			seed["NMTID"] = getTID(seed["SEED"], seed["TEPIG_INFO"][0])
-			seed["NMPASS"] = getPassword(seed["NMTID"])
 
-			seed["CMTID"] = getTID(seed["SEED"], seed["TEPIG_INFO"][0], True)
-			seed["CMPASS"] = getPassword(seed["CMTID"])
 
 			add_seed_to_list(seed)
 			seeds_found = seeds_found + 1
 	return seeds_found
+
+def gather_seed_info(seed):
+
+	seed["TEPIG_INFO"] = check_seed_for_tepig(seed["SEED"])
+	#Make these checks as early as possible to save time
+	if(seed["TEPIG_INFO"] is None or len(seed["TEPIG_INFO"][2]) < 1):
+		return None
+
+	seed["R6GROTTO"] = grotto_check(seed["SEED"])
+	if(len(seed["R6GROTTO"]) < 1):
+		return None
+
+	seed["DUCKS"] = getDucks(seed)
+	seed["DOVES"] = getBirds(seed)
+
+	seed["NMTID"] = getTID(seed["SEED"], seed["TEPIG_INFO"][0])
+	seed["NMPASS"] = getPassword(seed["NMTID"])
+
+	seed["CMTID"] = getTID(seed["SEED"], seed["TEPIG_INFO"][0], True)
+	seed["CMPASS"] = getPassword(seed["CMTID"])
+
+	if(len(seed["DUCKS"]) == 0 or len(seed["DOVES"]) == 0):
+		return None
+	
+	return seed
+
 
 
 def main():
@@ -411,7 +428,7 @@ def main():
 	compute_times()
 
 	try:
-		file = open(f"tucker_{nature_search}_{hex(timer0)}.txt", "w", encoding="UTF-8")
+		file = open(f"tts_{nature_search}_{hex(timer0)}.txt", "w", encoding="UTF-8")
 	except IOError:
 		print("Error trying to prep outfile")
 		exit()
@@ -428,10 +445,11 @@ def main():
 
 
 def test():
-	seed = 0x1712daad4d0f4c7d
-
-	candy_frames = check_seed_for_tepig(seed)
-	print(candy_frames)
+	seed = {"SEED": 0x8b83adc5f4516a00,
+		 	"MONTH": 3}
+	gather_seed_info(seed)
+	print(seed)
+	
 
 if __name__ == '__main__':
     main()

@@ -125,14 +125,10 @@ def chargestone_clouds(rngstate, coords):
     player_x = coords[0]
     player_y = coords[1]
     #player_x, player_y = 46, 6
-    print (player_x, player_y)
     if rng.next_rand(1000) < 100:
         # TODO: when does default case actually happen
         x_min, x_max, y_min, y_max = ranges[rng.next_rand(4) + 1]
 
-        print(x_min, y_min, x_max, y_max)
-
-        # print(x_min, x_max, y_min, y_max)
         x_min_in_chunk = max((player_x % 32) + x_min, 0)
         x_max_in_chunk = min((player_x % 32) + x_max, 31)
         y_min_in_chunk = max((player_y % 32) + y_min, 0)
@@ -144,7 +140,6 @@ def chargestone_clouds(rngstate, coords):
         y_min = y_min_in_chunk + player_y - (player_y % 32)
         y_max = y_max_in_chunk + player_y - (player_y % 32)
 
-        print( "(", x_min, y_min, ") (", x_max, y_max, ")")
 
         possible = []
         possible_x = []
@@ -218,9 +213,6 @@ def skip_checker(states_array, frame):
                     # first = 1
                     # pair_one = (state_index, first_coords)
                     # one.append(pair_one)
-                if comparison_1 != "No dust cloud":
-                    print(state_index, first_coords, " spawns cloud at ", comparison_1)
-
         if (frame + 100) < state_index < (frame + 120) and ((state_index - frame) % 2 == 0):
             for second_coords in usable_second_skip_tiles:
                 comparison_2 = chargestone_clouds(states[1], second_coords)
@@ -263,52 +255,36 @@ def skip_checker(states_array, frame):
 
 
 times = []
-for i in range(0,24):
-    for j in range(60):
-           for k in range(5,8):
+for i in range(23,24):
+    for j in range(35,50):
+           for k in range(5,7):
                   time1 = (i, j, k)
                   times.append(time1)
 
-keypress_fake = [[0xdf290000, "custom"]]
 
-#print(times)
-
-#sha1.set_button(0xdf290000)
-#sha1.set_time(*(6, 26, 7))
-#seed = sha1.hash_seed(precompute)
-
-#print(hex(seed))
 
 
 
 
 
 def wholeskip():
-    if user_keypress == 1:
+    seeds_searched = 0
+    seeds_found = 0
+    for presses in keypresses:
 
-        for presses in keypresses_3_4:
-            for time in times:
-                sha1.set_button(presses[0])
-                sha1.set_time(*time)
-                seed = sha1.hash_seed(precompute)
+        for time in times:
+            sha1.set_button(presses[0])
+            sha1.set_time(*time)
+            seed = sha1.hash_seed(precompute)
+            seeds_searched = seeds_searched + 1
+            ret = multi_cloud(seed)
+            cloud_states = ret[5]
+            init = initial_frame_bw(seed)
+            if skip_checker(cloud_states, init):
+                seeds_found = seeds_found + 1
+                print(time, hex(seed), presses[1])
 
-                ret = multi_cloud(seed)
-                cloud_states = ret[5]
-                init = initial_frame_bw(seed)
-                if skip_checker(cloud_states, init):
-                    print(time, hex(seed), presses[1])
-    elif user_keypress == 0:
-        for presses in keypresses_2:
-            for time in times:
-                sha1.set_button(presses[0])
-                sha1.set_time(*time)
-                seed = sha1.hash_seed(precompute)
-
-                ret = multi_cloud(seed)
-                cloud_states = ret[5]
-                init = initial_frame_bw(seed)
-                if skip_checker(cloud_states, init):
-                    print(time, hex(seed), presses[1])
+    print(f"Found {seeds_found} seeds out of {seeds_searched}")
 
 # wholeskip()
 
@@ -316,13 +292,13 @@ def wholeskip():
 # t
 
 def main():
+    global sha1, precompute
     user_year= int(input("Enter Year: "))
     user_month= int(input("Enter Month: "))
     user_day= int(input("Enter Day: "))
     user_dow = int(input("Enter day of week (Monday = 1, Tuesday = 2, etc): "))
-    user_mac = int(input("Enter MAC Address in decimal (convert from hex to decimal)"))
+    user_mac = int(input("Enter MAC Address in decimal (convert from hex to decimal)"), 16)
 
-    user_keypress = int(input("Enter keypress choice. Enter 0 for 0-2 keypresses, enter 1 for 3-4 keypresses"))
 
     sha1 = SHA1(version = Game.BLACK, language = Language.ENGLISH, ds_type=DSType.DS, mac = user_mac, soft_reset=False, v_frame= 8, gx_state=6)
     timer0 = 0xc7c
@@ -330,6 +306,7 @@ def main():
     date = (user_year, user_month, user_day, user_dow)
     sha1.set_date(*date)
     precompute = sha1.precompute()
+    wholeskip()
 
 def test():
     seed = 0xDC7C8C1FD09E4D19
@@ -341,4 +318,4 @@ def test():
         print(hex(seed))
 
 if __name__ == '__main__':
-    test()
+    main()
