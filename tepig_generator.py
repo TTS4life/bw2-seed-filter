@@ -4,10 +4,8 @@
 import numpy as np
 # import matplotlib.pyplot as plt
 from numba_pokemon_prngs.mersenne_twister import MersenneTwister
-import itertools
 from numba_pokemon_prngs.sha1 import SHA1
 from numba_pokemon_prngs.enums import Language, Game, DSType
-from MT import MT
 from keypresses import keypresses
 import time
 

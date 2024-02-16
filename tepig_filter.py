@@ -8,8 +8,8 @@ dir = os.getcwd()
 path = dir+"/result.txt"
 
 frame_entering_route20 = 430
-frame_exiting_route20 = 490
-frame_entering_ranch = 530
+frame_exiting_route20 = 530
+frame_entering_ranch = 480
 frame_exiting_ranch = 620
 
 
@@ -53,7 +53,7 @@ def getBirds(seed):
 	birds  = [ ]
 	for x in range(frame_entering_route20,frame_exiting_route20):
 		res = pokeGen(seed["seed"], x)
-		if res[0] and res[3]==0 and res[4] not in [natures[1],natures[11],natures[16],natures[21]]:
+		if res[0] and res[3]==0 or res[3] == 6 and res[4] not in [natures[1],natures[11],natures[16],natures[21]]:
 			if seed["month"] % 4 == 3:
 				if res[2]<5:
 					birds.append(str(res[1])+"\t"+table3[int(res[3])]+"\t"+res[4]+"\t"+str(res[5])+" Low")
@@ -192,8 +192,10 @@ def processFile(input_file, output_file):
 		print("error trying to write to file:", output_file)
 		exit()
 
+
 	for line in seedLst:
 		parsed = line.split(",")
+
 		seed = {
 			"seed" : int(parsed[16], 16),
 			"ivframe" : int(parsed[7]) - 1,
@@ -204,7 +206,7 @@ def processFile(input_file, output_file):
 			"hour" : int(parsed[3]),
 			"minute" : int(parsed[4]),
 			"second" : int(parsed[5]),
-			"key_presses" : str(parsed[17]).strip(),
+			"key_presses" : str(parsed[17]),
 			"stats": [ int(parsed[8]), int(parsed[9]), int(parsed[10]), int(parsed[11]), int(parsed[12]), int(parsed[13]) ]
 		}
 
