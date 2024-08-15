@@ -102,8 +102,9 @@ usable_first_skip_tiles = [(48, 34)]
                         #    (56, 50), (55,50), (54,50)]
 
 usable_second_skip_tiles = [(49, 23)]
-usable_third_skip_tiles = [(54, 13), (55, 12)]
-usable_fourth_skip_tiles = [(47, 5), (45, 7), (47, 9)]
+usable_third_skip_tiles = [(54, 13), (55, 14)]
+usable_fifth_skip_tiles = [(45,8), (47,8), (47,6), (47,4), (45,4)]
+usable_fourth_skip_tiles = [(43,11), (43,13), (44,14)]
 
 
 # these are tiles where a cloud should spawn for a valid skip
@@ -111,11 +112,12 @@ usable_fourth_skip_tiles = [(47, 5), (45, 7), (47, 9)]
 usable_first_cloud_tiles = [(49, 33), (50, 33), (51, 33)]
 
 usable_second_cloud_tiles = [(50, 21), (51, 21), (52, 21)]
-#usable_third_cloud_tiles = [(53, 13), (53, 14)]
-usable_fourth_cloud_tiles = [(48, 5), (48, 6), (48, 7), (48, 8)]
+# usable_third_cloud_tiles = [(53, 13), (53, 14)]
+usable_third_cloud_tiles = [(53, 14)]
+usable_fourth_cloud_tiles = [(44,9)]
+usable_fifth_cloud_tiles = [(48, 5), (48, 6), (48, 7), (48, 8)]
 
 # below is the optimal tile
-usable_third_cloud_tiles = [(53, 14)]
 
 
 
@@ -151,6 +153,7 @@ def chargestone_clouds(rngstate, coords):
                     possible_x.append(dust_x)
                     possible_y.append(dust_y)
         dust_cloud_x, dust_cloud_y = possible[rng.next_rand(len(possible))]
+        # print("cloud spawns at ", dust_cloud_x, dust_cloud_y , " from coords ", coords)
     else:
         return "No dust cloud"
     return (dust_cloud_x, dust_cloud_y)
@@ -200,63 +203,74 @@ def seed_frame(seed):
     return seed, initial_frame_bw(seed)
 
 
-def skip_checker(states_array, frame):
-    first, second, third, fourth = 0, 0, 0, 0
-    one, two, three, four = [], [], [], []
+def skip_checker(states_array, initial_frame):
+    first, second, third, fourth, fifth = 0, 0, 0, 0, 0
+    one, two, three, four, five = [], [], [], [], []
     for states in states_array:
-        state_index = states[0]
-        if state_index < 100 and state_index > (frame + 40) and ((state_index - frame) % 2 == 0):
+        state_index = states[0] #RNG frame of cloud
+
+        if state_index < initial_frame + 60 and state_index > initial_frame + 36 and ((state_index - initial_frame ) % 2 == 0):
             for first_coords in usable_first_skip_tiles:
                 comparison_1 = chargestone_clouds(states[1], first_coords)
-                # if comparison_1 != "No dust cloud" and (comparison_1 in usable_first_cloud_tiles):
-                    #print("Frame " + str(state_index) + " has a first skip " + str(states[1]) + hex(states[1]))
-                    # first = 1
-                    # pair_one = (state_index, first_coords)
-                    # one.append(pair_one)
-        if (frame + 100) < state_index < (frame + 120) and ((state_index - frame) % 2 == 0):
-            for second_coords in usable_second_skip_tiles:
-                comparison_2 = chargestone_clouds(states[1], second_coords)
-                if comparison_2 != "No dust cloud" and (comparison_2 in usable_second_cloud_tiles):
-                    #print("Frame " + str(state_index) + " has a second skip " + str(states[1]) + hex(states[1]))
-                    second = 1
-                    pair_two = (state_index, second_coords)
-                    two.append(pair_two)
-        if (frame + 182) < state_index < (frame + 246) and ((state_index - frame) % 2 == 0):
-            for third_coords in usable_third_skip_tiles:
-                comparison_3 = chargestone_clouds(states[1], third_coords)
-                if comparison_3 != "No dust cloud" and (comparison_3 in usable_third_cloud_tiles):
-                    #print("Frame " + str(state_index) + " has a third skip " + str(states[1]) + hex(states[1]))
-                    third = 1
-                    pair_three = (state_index, third_coords)
-                    three.append(pair_three)
-        if (frame + 260) < state_index < (frame + 310) and ((state_index - frame) % 2 == 0):
-            for fourth_coords in usable_fourth_skip_tiles:
-                comparison_4 = chargestone_clouds(states[1], fourth_coords)
-                if comparison_4 != "No dust cloud" and (comparison_4 in usable_fourth_cloud_tiles):
-                    #print("Frame " + str(state_index) + " has a fourth skip " + str(states[1]) + hex(states[1]))
-                    fourth = 1
-                    pair_four = (state_index, fourth_coords)
-                    four.append(pair_four)
-    comparison = [first, second, third, fourth]
-    skips = [one, two, three, four]
+                if comparison_1 != "No dust cloud" and (comparison_1 in usable_first_cloud_tiles):
+                    first = 1
+                    pair_one = (state_index, first_coords)
+                    one.append(pair_one)
+                    
+        for valid_first in one:
+            first_frame = valid_first[0]
+            if state_index < first_frame + 80 and  state_index > first_frame + 60 and ((state_index - initial_frame) % 2 == 0):
+                for second_coords in usable_second_skip_tiles:
+                    comparison_2 = chargestone_clouds(states[1], second_coords)
+                    if comparison_2 != "No dust cloud" and (comparison_2 in usable_second_cloud_tiles):
+                        second = 1
+                        pair_two = (state_index, second_coords)
+                        two.append(pair_two)
+                        
+        for valid_second in two:
+            second_frame = valid_second[0]
+            if state_index < second_frame + 90 and state_index > second_frame + 70 and ((second_frame - state_index) % 2 == 0):
+                for third_coords in usable_third_skip_tiles:
+                    comparison_3 = chargestone_clouds(states[1], third_coords)
+                    if(comparison_3 != "No dust cloud" and (comparison_3 in usable_third_cloud_tiles)):
+                        third = 1
+                        three.append((state_index, third_coords))
 
-    #print(comparison)
-    if comparison == [1,1,1,1]:
+        for valid_third in three:
+            third_frame = valid_third[0]
+            if state_index < third_frame + 90 and state_index > third_frame + 55 and ((third_frame - state_index) % 2 == 1):
+                for fourth_coords in usable_fourth_skip_tiles:
+                    comparison_4 = chargestone_clouds(states[1], fourth_coords)
+                    if comparison_4 != "No dust cloud" and (comparison_4 in usable_fourth_cloud_tiles):
+                        fourth = 1
+                        four.append((state_index, fourth_coords))
+
+        for valid_fourth in four:
+            fourth_frame = valid_fourth[0]
+            if state_index < fourth_frame + 75 and state_index > fourth_frame + 45 and ((state_index - fourth_frame) % 2 == 1):
+                for fifth_coords in usable_fifth_skip_tiles:
+                    comparison_5 = chargestone_clouds(states[1], fifth_coords)
+                    if comparison_5 != "No dust cloud" and (comparison_5 in usable_fifth_cloud_tiles):
+                        fifth = 1 
+                        five.append((state_index, fifth_coords))
+
+
+
+    comparison = [first, second, third, fourth, fifth]
+    skips = [initial_frame, set(one), set(two), set(three), set(four), set(five)]
+
+
+    # print(comparison)
+    if comparison == [1,1,1,1,1]:
         #print("this seed fucking works")
             print(skips)
             return True
 
     
-        
-
-
-
-
-
 
 times = []
-for i in range(23,24):
-    for j in range(35,50):
+for i in range(0,23):
+    for j in range(0,60):
            for k in range(5,7):
                   time1 = (i, j, k)
                   times.append(time1)
@@ -264,15 +278,12 @@ for i in range(23,24):
 
 
 
-
-
-
 def wholeskip():
     seeds_searched = 0
     seeds_found = 0
-    for presses in keypresses:
+    for time in times:
 
-        for time in times:
+        for presses in keypresses:
             sha1.set_button(presses[0])
             sha1.set_time(*time)
             seed = sha1.hash_seed(precompute)
@@ -300,16 +311,17 @@ def main():
     user_mac = int(input("Enter MAC Address in decimal (convert from hex to decimal)"), 16)
 
 
-    sha1 = SHA1(version = Game.BLACK, language = Language.ENGLISH, ds_type=DSType.DS, mac = user_mac, soft_reset=False, v_frame= 8, gx_state=6)
-    timer0 = 0xc7c
+    sha1 = SHA1(version = Game.WHITE, language = Language.ENGLISH, ds_type=DSType.DS, mac = user_mac, soft_reset=False, v_frame= 8, gx_state=6)
+    timer0 = 0xc80
     sha1.set_timer0(timer0, 0x60)
     date = (user_year, user_month, user_day, user_dow)
     sha1.set_date(*date)
     precompute = sha1.precompute()
+    print("Start!")
     wholeskip()
 
 def test():
-    seed = 0xDC7C8C1FD09E4D19
+    seed = 0x6fef814e65d4da49 
     ret = multi_cloud(seed)
     cloud_states = ret[5]
     init = initial_frame_bw(seed)

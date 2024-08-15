@@ -6,8 +6,12 @@ from numba_pokemon_prngs.lcrng import BWRNG
 import itertools
 from numba_pokemon_prngs.sha1 import SHA1
 from numba_pokemon_prngs.enums import Language, Game, DSType
-from trainer_skips.keypresses import *
-from trainer_skips.sharedfuncs import * 
+if __name__ == '__main__':
+    from keypresses import *
+    from sharedfuncs import *
+else:
+    from trainer_skips.keypresses import *
+    from trainer_skips.sharedfuncs import * 
 
 test = False
 user_year = None
@@ -118,7 +122,7 @@ def extra(seed,fc):
     return fc
 
 # below are fast tiles      #(4,213)
-usable_first_skip_tiles = [(6,213)]
+usable_first_skip_tiles = [(5,213)] #[(6,213)]
 usable_second_skip_tiles = [ (4,26), (6,26), (5,27), (6,23), (5,24), (4,23)]
 
 
@@ -177,7 +181,7 @@ def skip_checker(states_array, frame):
             print (state_index)
         
                 # 170
-        if state_index < frame + 170 and state_index > (frame + 140): #and ((state_index - frame) % 2 == 0 --remove parity check for now
+        if state_index < frame + 155 and state_index > (frame + 135): #and ((state_index - frame) % 2 == 0 --remove parity check for now        #170/140 for gym
             for first_coords in usable_first_skip_tiles: # reasonable tiles to step on to spawn cloud
                 comparison_1, quadrant = cloud_location_finder(states[1], first_coords, valid_route21_tiles)
                 if comparison_1 != "No dust cloud" and (comparison_1 in usable_first_cloud_tiles):
@@ -191,7 +195,7 @@ def skip_checker(states_array, frame):
         for valid_first in one:
             first_frame = valid_first[0]
                             # Need to make clouds like 120-130 from first cloud-ish
-            if state_index < first_frame + 150 and state_index > (first_frame + 110):    #450 - 260
+            if state_index < first_frame + 180 and state_index > (first_frame + 130):    #450 - 260
                 for second_coords in usable_second_skip_tiles:
                     comp_2, quadrant = cloud_location_finder(states[1], second_coords, valid_seaside_tiles)
                     if(comp_2 != "No dust cloud" and (comp_2 in usable_second_cloud_tiles)):
@@ -223,8 +227,8 @@ def wholeskip(outfile):
  
     file = open(outfile, "w")
 
-    for time in times:
-        for presses in keypresses:
+    for presses in keypresses:
+        for time in times:
             if illegal_keypresses(presses[1]):
                 continue
             
@@ -241,7 +245,7 @@ def wholeskip(outfile):
             if valid_skip is True:
                 # print(time, hex(seed), init, presses[1], "first ", first, " second ", second)
 
-                output = f"{time[0]}:{time[1]}:{time[2]}, {hex(seed)} {init} {presses[1]} first {first}, second {second}\n"
+                output = f"{time[0]}:{time[1]}:{time[2]} {hex(seed)} \n {init} {presses[1]} \n first {len(first)} {first} \n second {len(second)} {second}\n\n"
                 file.write(output)
 
     file.close()
@@ -254,8 +258,8 @@ def main(version, language, year, month, day, dow, mac, timer0, outfile):
     user_dow = int(dow)
     user_mac = int(mac, 16)
     timer0 = int(timer0, 16)
-    user_hour = 17
-    user_min = 8
+    user_hour = 3
+    user_min = 57
     #user_keypress = int(input("Enter keypress choice. Enter 0 for 0-2 keypresses, enter 1 for 3-4 keypresses"))
     #user_hour = int(input("Enter hour you are at near skip"))
     #user_min = int(input("enter minute near skip"))
@@ -282,7 +286,7 @@ def test_multicloud():
 def test():
     global test
     test = True
-    seed =  0xcb6c3f6d9343ec9d
+    seed =  0xbe3087e978944d68
     ret = multi_cloud(seed)
     cloud_states = ret[5]
     init = getInitialFrame(seed)
@@ -292,5 +296,5 @@ def test():
 
 
 if __name__ == '__main__':
-    main()
+    test()
 
