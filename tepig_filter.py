@@ -3,6 +3,7 @@ import os
 import tkinter as tk 
 from tkinter import ttk
 from typing import Optional
+from file.SSS4 import SSS4 as TepigFileSSS4
 
 dir = os.getcwd()
 path = dir+"/result.txt"
@@ -179,36 +180,15 @@ def processSeed(input_seed, ivframe, month):
 
 def processFile(input_file, output_file):
 
-	try:
-		seedLst = open(input_file, "r+", encoding="Shift-JIS")
-	except IOError:
-		print("Error attempting to open file:", path)
+	print("Instantiating SSS4 wtih file ", input_file)
+	file = TepigFileSSS4(input_file)
+	if not file.open():
+		print("failure to open file")
 		exit()
 
-	seedLst.readline()
-	try:
-		output = open(output_file,"w",encoding="UTF-8")
-	except IOError:
-		print("error trying to write to file:", output_file)
-		exit()
+	output = open(output_file, "w", encoding="UTF-8")
 
-
-	for line in seedLst:
-		parsed = line.split(",")
-
-		seed = {
-			"seed" : int(parsed[16], 16),
-			"ivframe" : int(parsed[7]) - 1,
-			"timer0" : str(parsed[6]),
-			"year" : int(parsed[0]) + 2000,
-			"month" : int(parsed[1]),
-			"day" : int(parsed[2]),
-			"hour" : int(parsed[3]),
-			"minute" : int(parsed[4]),
-			"second" : int(parsed[5]),
-			"key_presses" : str(parsed[17]),
-			"stats": [ int(parsed[8]), int(parsed[9]), int(parsed[10]), int(parsed[11]), int(parsed[12]), int(parsed[13]) ]
-		}
+	while (seed := file.parseLine()):
 
 		seed["NMTID"] = getTID(seed["seed"], seed["ivframe"])
 		seed["NMPASS"] = getPassword(seed["NMTID"])
@@ -234,8 +214,10 @@ def processFile(input_file, output_file):
 		for y in seed["ducks"]:
 			output.write(y+"\n")
 		output.write("\n\n")
-	seedLst.close()
+	file.close()
 	output.close()
+
+	print("Finished!")
 
 def format_output(seed):
 	
