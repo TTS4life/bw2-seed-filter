@@ -46,11 +46,11 @@ ranges = (
 
 def rngAdvance(prev):
 	next=0x5D588B656C078965 * prev + 0x0000000000269EC3
-	return next%0x10000000000000000
+	return next
 
 def rngRAdvance(prev):
     next = 0xdedcedae9638806d * prev + 0x9b1ae6e9a384e6f9
-    return next%0x10000000000000000
+    return next
 
 table = [[50, 100, 100, 100], [50, 50, 100, 100], [30, 50, 100, 100],[25, 30, 50, 100], [20, 25, 33, 50]]
 
@@ -219,7 +219,7 @@ def skip_checker(states_array, initial_frame):
                     
         for valid_first in one:
             first_frame = valid_first[0]
-            if state_index < first_frame + 80 and  state_index > first_frame + 60 and ((state_index - initial_frame) % 2 == 0):
+            if state_index < first_frame + 85 and  state_index > first_frame + 60 and ((state_index - initial_frame) % 2 == 0):
                 for second_coords in usable_second_skip_tiles:
                     comparison_2 = chargestone_clouds(states[1], second_coords)
                     if comparison_2 != "No dust cloud" and (comparison_2 in usable_second_cloud_tiles):
@@ -229,7 +229,7 @@ def skip_checker(states_array, initial_frame):
                         
         for valid_second in two:
             second_frame = valid_second[0]
-            if state_index < second_frame + 90 and state_index > second_frame + 70 and ((second_frame - state_index) % 2 == 0):
+            if state_index < second_frame + 95 and state_index > second_frame + 70 and ((second_frame - state_index) % 2 == 0):
                 for third_coords in usable_third_skip_tiles:
                     comparison_3 = chargestone_clouds(states[1], third_coords)
                     if(comparison_3 != "No dust cloud" and (comparison_3 in usable_third_cloud_tiles)):
@@ -238,7 +238,7 @@ def skip_checker(states_array, initial_frame):
 
         for valid_third in three:
             third_frame = valid_third[0]
-            if state_index < third_frame + 90 and state_index > third_frame + 55 and ((third_frame - state_index) % 2 == 1):
+            if state_index < third_frame + 95 and state_index > third_frame + 55 and ((third_frame - state_index) % 2 == 1):
                 for fourth_coords in usable_fourth_skip_tiles:
                     comparison_4 = chargestone_clouds(states[1], fourth_coords)
                     if comparison_4 != "No dust cloud" and (comparison_4 in usable_fourth_cloud_tiles):
@@ -247,7 +247,7 @@ def skip_checker(states_array, initial_frame):
 
         for valid_fourth in four:
             fourth_frame = valid_fourth[0]
-            if state_index < fourth_frame + 75 and state_index > fourth_frame + 45 and ((state_index - fourth_frame) % 2 == 1):
+            if state_index < fourth_frame + 80 and state_index > fourth_frame + 45 and ((state_index - fourth_frame) % 2 == 1):
                 for fifth_coords in usable_fifth_skip_tiles:
                     comparison_5 = chargestone_clouds(states[1], fifth_coords)
                     if comparison_5 != "No dust cloud" and (comparison_5 in usable_fifth_cloud_tiles):
@@ -269,7 +269,7 @@ def skip_checker(states_array, initial_frame):
     
 
 times = []
-for i in range(0,23):
+for i in[4, 5, 6, 7, 8, 23]:
     for j in range(0,60):
            for k in range(5,7):
                   time1 = (i, j, k)
@@ -287,6 +287,7 @@ def wholeskip():
             sha1.set_button(presses[0])
             sha1.set_time(*time)
             seed = sha1.hash_seed(precompute)
+            # print(hex(seed))
             seeds_searched = seeds_searched + 1
             ret = multi_cloud(seed)
             cloud_states = ret[5]
@@ -304,16 +305,34 @@ def wholeskip():
 
 def main():
     global sha1, precompute
+    print("Welcome to Plasma 5 skip generator")
+    print("Do note that this is intended for NDS and NDS emulators only.")
+    print("After configuring your parameters, you will get an output like this: ")
+    print("[[(96, (48, 34))], [(156, (49, 23)), (170, (49, 23))], [(242, (54, 13))], [(320, (47, 5)), (320, (45, 7)), (356, (45, 7)), (358, (45, 7))]] \n (19, 40, 6) 0x2d87c473533530c2 ['R', 'L', 'X']")
+    print("Each set of numbers is to be interpreted as \n (PIDFRAME, (X coord, Y Coord)), where, for the cloud to spawn in an intended place, \n you will walk onto tile (x,y) on frame PIDFRAME at the same time \n your cloud step counter hits 20")
+    print("Followed by the date/time, the seed itself for routing/testing, and keypresses required to hit the seed")
     user_year= int(input("Enter Year: "))
     user_month= int(input("Enter Month: "))
     user_day= int(input("Enter Day: "))
     user_dow = int(input("Enter day of week (Monday = 1, Tuesday = 2, etc): "))
-    user_mac = int(input("Enter MAC Address in decimal (convert from hex to decimal)"), 16)
+    user_mac = int(input("Enter MAC Address as Hex "), 16)
+    # user_vframe = int(input("Enter VFrame "))
+    # user_gx_state = int(input("Enter gx_stat "))
+    # user_vcount = int(input("Enter VCount "), 16)
+    # user_timer0 = int(input("Enter Timer0 "), 16)
 
+    tmp = int(input("Press 1 for Black, 2 for White"))
+    if tmp == 1:
+        user_version = Game.BLACK
+    elif tmp == 2:
+        user_version = Game.WHITE
+    else:
+        print("Unknown input, Black defaulted")
+        user_version = Game.BLACK
 
-    sha1 = SHA1(version = Game.WHITE, language = Language.ENGLISH, ds_type=DSType.DS, mac = user_mac, soft_reset=False, v_frame= 8, gx_state=6)
-    timer0 = 0xc80
-    sha1.set_timer0(timer0, 0x60)
+    sha1 = SHA1(version = Game.WHITE, language = Language.ENGLISH, ds_type=DSType.DS, mac = user_mac, soft_reset=False, v_frame=8, gx_state=6)
+    # timer0 = user_timer0
+    sha1.set_timer0(0xc7f, 0x60)
     date = (user_year, user_month, user_day, user_dow)
     sha1.set_date(*date)
     precompute = sha1.precompute()

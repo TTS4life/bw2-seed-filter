@@ -14,17 +14,22 @@ times = []
 
 #Edit these parameters for your DS
 
-month = 9
-day = 18
-year = 2048
-dow = 5
+month = 5
+day = 25
+year = 2089
+dow = 3		#day of week, Monday is 1, Sunday is 7
 
-timer0 = 0x10f7
-ds_mac = 0x9BF6D93CE # Sugar - 9BF6D93CE
+timer0 = 0x10f4
+ds_mac = 0x9BFB9E7E1 
 
-nature_search = 'Naughty'
+nature_search = 'Rash'
 
+#for decsy 
+language = Language.ENGLISH		# Language.ENGLISH or Language.JAPANESE
+
+#DO not edit this
 file = None
+
 
 #Edit these for frame windows for different things. Only the lack of doves/ducks 
 # will cause a seed to not appear in the final product. Candy will only appear in output if
@@ -226,7 +231,7 @@ def add_seed_to_list(seed):
 		f"Tepig:\n" +
 		str(seed["TEPIG_INFO"]) + "\n")
 	
-	if(len(seed["R6GROTTO"]) > 0):
+	if("R6GROTTO" in seed and len(seed["R6GROTTO"]) > 0):
 		file.write(f"Route 6 Grotto Candy Frames: {seed['R6GROTTO']}\n")
 	
 	for x in seed["DOVES"]:
@@ -295,9 +300,9 @@ def check_seed_for_tepig(seed):
 
 	#28/29/30/30/20/30
 	if nature_search == 'Rash':
-		if(stat1 >= 27 and stat2 >= 29 and stat3 >= 29 and stat4 >= 29 and stat6 >= 26 ):
+		if(stat1 >= 28 and stat2 >= 29 and stat3 >= 30 and stat4 >= 30 and stat5 >= 20 and stat6 >= 30 ):
 			return [15, [stat1, stat2, stat3, stat4, stat5, stat6], tepig_ability_check(seed)]
-		if(stat2 >= 27 and stat3 >= 29 and stat4 >= 29 and stat5 >= 29 and stat7 >= 26):
+		if(stat2 >= 28 and stat3 >= 29 and stat4 >= 30 and stat5 >= 30  and stat6 >= 20 and stat7 >= 30):
 			return [16, [stat2, stat3, stat4, stat5, stat6, stat7], tepig_ability_check(seed)]	
 		# if(stat3 >= 28 and stat4 >= 29 and stat5 >= 30 and stat6 >= 30 and stat7 >= 20 and stat8 >= 30):
 		# 		return [17, [stat3, stat4, stat5, stat6, stat7, stat8], tepig_ability_check(seed)]
@@ -412,7 +417,7 @@ def gather_seed_info(seed):
 
 
 def main():
-	global seeds, timer0, file, ds_mac
+	global seeds, timer0, file, ds_mac, language
 
 	start = time.time()
 
@@ -426,12 +431,12 @@ def main():
 	compute_times()
 
 	try:
-		file = open(f"tts_{nature_search}_{hex(timer0)}.txt", "w", encoding="UTF-8")
+		file = open(f"{nature_search}_{hex(timer0)}.txt", "w", encoding="UTF-8")
 	except IOError:
 		print("Error trying to prep outfile")
 		exit()
 
-	print("Begin!")
+	print(f"Begin! Timer0: {hex(timer0)}")
 	seeds_found = mine_seeds(sha1, precompute)
 
 	file.close()

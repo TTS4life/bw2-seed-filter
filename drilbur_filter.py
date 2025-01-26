@@ -1,8 +1,3 @@
-import os
-
-dir = os.getcwd()
-path = dir+"\\search.txt"
-
 def rngAdvance(prev):
 	next=0x5D588B656C078965 * prev + 0x0000000000269EC3
 	return next%0x10000000000000000
@@ -29,7 +24,7 @@ def dustGen(seed,frame):
     ability = rngAdvance(ability)
     pokenat = rngAdvance(ability)
     isEncounter = int((((trigger>>32)*1000)>>32))
-    if isEncounter <400:
+    if isEncounter < 400:
         appear = True
     else:
         appear = False
@@ -112,6 +107,7 @@ def main(infile, outfile):
     output = open(outfile,"w",encoding = "UTF-8")
     for line in seedLst:
         parsed = line.split("\t")
+        # parsed.pop(0)
         seed = int(parsed[0],16)
         seed = rngAdvance(seed)
         year = parsed[1]
@@ -130,11 +126,11 @@ def main(infile, outfile):
         if date in badDates[month]:
             continue
 
-        dusts = dustSearch(seed,init+26,init+30)
+        dusts = dustSearch(seed,init+26,init+40)
         if len(dusts) == 0:
             continue
         else:
-            drills = drilSearch(seed,dusts[0]+4,dusts[0]+20)
+            drills = drilSearch(seed,dusts[0]+4,dusts[-1]+60)
             if len(drills) == 0:
                 continue
             else:

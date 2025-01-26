@@ -11,22 +11,22 @@ import time
 file = None
 seeds = []
 
-mac = 0x9BFE1AB59
+mac = 0x9BF3f2a97
 
 version = Game.BLACK
 language = Language.ENGLISH
 dsType = DSType.DS
 
-hour = 12
-min = 45
-sec = 15
+hour = 4
+min = 22
+sec = 32
 
 timer0 = 0xc7c
 
-day = 28
-month = 8
-year = 2009
-dow = 5
+day = 19
+month = 12
+year = 2011
+dow = 1
 
 natures = ['Hardy','Lonely','Brave','Adamant',
          'Naughty','Bold','Docile','Relaxed',

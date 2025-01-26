@@ -1,5 +1,9 @@
 #!/usr/bin/python3
 
+from os import listdir, getcwd
+from os.path import isfile, join
+
+
 def rngAdvance(prev):
 	next= 0x5D588B656C078965 * prev + 0x0000000000269EC3
 	return next%0x10000000000000000
@@ -105,62 +109,72 @@ def initial_frame_bw(prng):
     return count
           
 
-def main(infile, outfile):
-    seedLst = open(infile, "r+", encoding = "UTF-8")
+def main(outfile):
+
     output = open(outfile,"w",encoding = "UTF-8")
-    for line in seedLst:
-        parsed = line.split("\t")
-        seed = int(parsed[0],16)
-        seed = rngAdvance(seed)
-        year = parsed[1]
-        year = int(year)%100
-        keys = parsed[19].strip()
-        timestr = parsed[1] + "/"+parsed[2]+"/"+parsed[3]+" "+"{:02d}".format(int(parsed[4]))+":"+"{:02d}".format(int(parsed[5]))+":"+"{:02d}".format(int(parsed[6]))
-        timer0 = parsed[8]
-        ivs = [parsed[12],parsed[13],parsed[14],parsed[15],parsed[16],parsed[17]]
-        if keys[0] == " ":
-            continue
+    all_files = [f for f in listdir(getcwd()) if isfile(join(getcwd(), f)) ]
 
-        initial_frame = initial_frame_bw(seed)
+    for file in all_files:
+        seedLst = open(file, "r+", encoding = "UTF-8")
+        next(file)
+        seedcount = 0
+        foundseeds = 0
+        for line in seedLst:
+            seedcount += 1
+            parsed = line.split("\t")
+            seed = int(parsed[0],16)
+            pup_frame = int(parsed[1])
+            ability = parsed[9]
+            nature = parsed[8]
+            time = parsed[-3]
+            timer0 = parsed[-2]
+            ivs = [parsed[10],parsed[11],parsed[12],parsed[13],parsed[14],parsed[15]]
+            keys = parsed[-1]
 
-
-        month = int(parsed[2])
-        if month % 4 != 0:
-            continue
-        date = int(parsed[3])
-        if date in badDates[month]:
-            continue
-
-        pickups = pickup(seed, initial_frame)
-        if len(pickups) == 0:
-            continue
-
-        pups = getPups(seed, initial_frame)
-        if(len(pups) == 0):
-            continue
+            initial_frame = initial_frame_bw(seed)
 
 
-        output.write("Seed: "+hex(seed)[2:]+"\n")
-        output.write("Time: "+timestr+"\n")
-        output.write("Timer0: "+timer0+"\n")
-        output.write("Keypresses: "+keys+"\n")
-        output.write("IVs: "+str(ivs)+"\n")
-        output.write("Initial Frame: "+str(initial_frame)+"\n")
-        output.write("Lillipups: \n")
-        for x in pups:
-            output.write(f"{str(pups)}\n")
+            month = int(parsed[2])
+            print(f"month {month}")
+            if month % 4 != 0:
+                print("bad month continue")
+                continue
+            date = int(parsed[3])
+            if date in badDates[month]:
+                print('bad day continue')
+                continue
 
-        output.write("Pickup: ")
-        for x in pickups:
-            output.write(f"{str(x)} \n")
-        output.write("\n")
-        output.write("\n\n")
+            pickups = pickup(seed, initial_frame)
 
-    seedLst.close()
-    output.close()
+            pups = getPups(seed, pup_frame)
+            if(len(pups) == 0):
+                print("no pups continue")
+                continue
+
+            foundseeds += 1
+
+            output.write("Seed: "+hex(seed)+"\n")
+            output.write("Time: "+time+"\n")
+            output.write("Timer0: "+timer0+"\n")
+            output.write("Keypresses: "+keys+"\n")
+            output.write("IVs: "+str(ivs)+"\n")
+            output.write("Initial Frame: "+str(initial_frame)+"\n")
+            output.write("Lillipups: \n")
+            for x in pups:
+                output.write(f"{str(pups)}\n")
+
+            output.write("Pickup: ")
+            for x in pickups:
+                output.write(f"{str(x)} \n")
+            output.write("\n")
+            output.write("\n\n")
+
+        seedLst.close()
+        output.close()
+
+        print(f"{foundseeds} seeds found out of {seedcount} seeds")
 
 if __name__ == '__main__':    
 
-    in_file = input("file to read: ")
     out_file = input("file to write results to: ")
-    main(in_file, out_file)
+    main(out_file)

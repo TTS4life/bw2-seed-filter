@@ -3,6 +3,8 @@ import numpy as np
 from numba_pokemon_prngs.sha1 import SHA1
 from numba_pokemon_prngs.enums import Language, Game, DSType
 
+test = False
+
 ranges = (
     (-5, 5, -5, 5), # default case
     (0, 5, -5, 5), #Right of player
@@ -96,8 +98,8 @@ def cloud_location_finder(rngstate, coords, tileset):
         dust_cloud_x, dust_cloud_y = possible[rand_tile]
     else:
         return "No dust cloud"
-    # if test is True:
-    #     print("cloud spawns at ", (dust_cloud_x, dust_cloud_y), " from coords ", coords, " rand tile ", rand_tile, " possible ", possible, len(possible)
-    #           )
+    if test is True:
+        print("cloud spawns at ", (dust_cloud_x, dust_cloud_y), " from coords ", coords, " rand tile ", rand_tile, " possible ", possible, len(possible)
+              )
     
     return ((dust_cloud_x, dust_cloud_y), quadrant)
