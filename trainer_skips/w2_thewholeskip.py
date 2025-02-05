@@ -122,7 +122,7 @@ def extra(seed,fc):
     return fc
 
 # below are fast tiles      #(4,213)
-usable_first_skip_tiles = [(5,213)] #[(6,213)]
+usable_first_skip_tiles = [(6,213)]
 usable_second_skip_tiles = [ (4,26), (6,26), (5,27), (6,23), (5,24), (4,23)]
 
 
@@ -175,13 +175,13 @@ def skip_checker(states_array, frame):
     extra_clouds = [] # for testing, see extra clouds in a seed
     for states in states_array:
         state_index = states[0] # RNG Frame of cloud
-        
+
         if test is True:
             print("======")
             print (state_index)
-        
+
                 # 170
-        if state_index < frame + 155 and state_index > (frame + 135): #and ((state_index - frame) % 2 == 0 --remove parity check for now        #170/140 for gym
+        if state_index < frame + 180 and state_index > (frame + 155): #and ((state_index - frame) % 2 == 0 --remove parity check for now
             for first_coords in usable_first_skip_tiles: # reasonable tiles to step on to spawn cloud
                 comparison_1, quadrant = cloud_location_finder(states[1], first_coords, valid_route21_tiles)
                 if comparison_1 != "No dust cloud" and (comparison_1 in usable_first_cloud_tiles):
@@ -195,7 +195,7 @@ def skip_checker(states_array, frame):
         for valid_first in one:
             first_frame = valid_first[0]
                             # Need to make clouds like 120-130 from first cloud-ish
-            if state_index < first_frame + 180 and state_index > (first_frame + 130):    #450 - 260
+            if state_index < first_frame + 200 and state_index > (first_frame + 130):    #450 - 260
                 for second_coords in usable_second_skip_tiles:
                     comp_2, quadrant = cloud_location_finder(states[1], second_coords, valid_seaside_tiles)
                     if(comp_2 != "No dust cloud" and (comp_2 in usable_second_cloud_tiles)):
@@ -205,13 +205,13 @@ def skip_checker(states_array, frame):
                         continue
                     # else: 
                         # print("frame ", state_index, " spawn cloud ", comp_2, " from tile " , second_coords)
-                
+
     comparison = [first, second]
 
     if comparison == [1,1]:  
         if(len(two) > 1):  
             return True, one, two
-    
+
     return False, [], []
 
 
@@ -224,17 +224,19 @@ def illegal_keypresses(keypresses):
 
 def wholeskip(outfile):
     global sha1
- 
+
     file = open(outfile, "w")
 
     for presses in keypresses:
+
+        if illegal_keypresses(presses[1]):
+            continue
+
         for time in times:
-            if illegal_keypresses(presses[1]):
-                continue
-            
             sha1.set_button(presses[0])
             sha1.set_time(*time)
             seed = sha1.hash_seed(precompute)
+
 
             ret = multi_cloud(seed)
             cloud_states = ret[5] #[[frame, rng value of frame], ...]
@@ -245,7 +247,7 @@ def wholeskip(outfile):
             if valid_skip is True:
                 # print(time, hex(seed), init, presses[1], "first ", first, " second ", second)
 
-                output = f"{time[0]}:{time[1]}:{time[2]} {hex(seed)} \n {init} {presses[1]} \n first {len(first)} {first} \n second {len(second)} {second}\n\n"
+                output = f"{time[0]}:{time[1]}:{time[2]} {hex(seed)}\n {init} {presses[1]} \n first {len(first)} {first} \n second {len(second)} {second}\n\n"
                 file.write(output)
 
     file.close()
@@ -258,8 +260,8 @@ def main(version, language, year, month, day, dow, mac, timer0, outfile):
     user_dow = int(dow)
     user_mac = int(mac, 16)
     timer0 = int(timer0, 16)
-    user_hour = 3
-    user_min = 57
+    user_hour = 1
+    user_min = 6
     #user_keypress = int(input("Enter keypress choice. Enter 0 for 0-2 keypresses, enter 1 for 3-4 keypresses"))
     #user_hour = int(input("Enter hour you are at near skip"))
     #user_min = int(input("enter minute near skip"))
@@ -277,7 +279,7 @@ def main(version, language, year, month, day, dow, mac, timer0, outfile):
 
     print("Searching...")
     wholeskip(outfile)
-    
+
 def test_multicloud():
     clouds = multi_cloud(0x1111111111111111)
     print(clouds)
@@ -286,7 +288,7 @@ def test_multicloud():
 def test():
     global test
     test = True
-    seed =  0xbe3087e978944d68
+    seed =  0x33960b0a8db0e38f
     ret = multi_cloud(seed)
     cloud_states = ret[5]
     init = getInitialFrame(seed)

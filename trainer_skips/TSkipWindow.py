@@ -146,7 +146,7 @@ def run():
         case "Saturday":
             dow = 6
         case "Sunday":
-            dow = 7
+            dow = 0
     
     
     errText.set("Searching...")

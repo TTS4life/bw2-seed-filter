@@ -1,3 +1,5 @@
+from file.Pokefinderfile import PokefinderFile
+
 def rngAdvance(prev):
 	next=0x5D588B656C078965 * prev + 0x0000000000269EC3
 	return next%0x10000000000000000
@@ -103,43 +105,43 @@ def dustSearch(seed,min,max):
     return clouds
 
 def main(infile, outfile):
-    seedLst = open(infile, "r+", encoding = "UTF-8")
+    
+    data = PokefinderFile(infile)
+    data.open()
+    seeds_analyzed = []
+
     output = open(outfile,"w",encoding = "UTF-8")
-    for line in seedLst:
-        parsed = line.split("\t")
-        # parsed.pop(0)
-        seed = int(parsed[0],16)
-        seed = rngAdvance(seed)
-        year = parsed[1]
-        year = int(year)%100
-        keys = parsed[19].strip()
-        timestr = parsed[1] + "/"+parsed[2]+"/"+parsed[3]+" "+"{:02d}".format(int(parsed[4]))+":"+"{:02d}".format(int(parsed[5]))+":"+"{:02d}".format(int(parsed[6]))
-        timer0 = parsed[8]
-        ivs = [parsed[12],parsed[13],parsed[14],parsed[15],parsed[16],parsed[17]]
-        if keys[0] == " ":
-            continue
-        init = getInitialFrame(seed)
-        month = int(parsed[2])
-        if month in [2,6,10]:
-            continue
-        date = int(parsed[3])
-        if date in badDates[month]:
+
+
+    while (seed := data.parseLine()):
+
+        if seed["seed"] in seeds_analyzed:  #Prevent dupes from Pokefinder
             continue
 
-        dusts = dustSearch(seed,init+26,init+40)
+        seeds_analyzed.append(seed["seed"])
+        
+        seed["init"] = int(getInitialFrame(seed["seed"]))
+
+        if seed["month"] in [2,6,10]:
+            continue
+
+        if int(seed["day"]) in badDates[int(seed["month"])]:
+            continue
+
+        dusts = dustSearch(seed["seed"], seed["init"] + 26, seed["init"] + 40)
         if len(dusts) == 0:
             continue
         else:
-            drills = drilSearch(seed,dusts[0]+4,dusts[-1]+60)
+            drills = drilSearch(seed["seed"], dusts[0] + 4,dusts[-1] + 60)
             if len(drills) == 0:
                 continue
             else:
-                output.write("Seed: "+hex(seed)[2:]+"\n")
-                output.write("Time: "+timestr+"\n")
-                output.write("Timer0: "+timer0+"\n")
-                output.write("Keypresses: "+keys+"\n")
-                output.write("IVs: "+str(ivs)+"\n")
-                output.write("Initial PIDRNG Frame: " + str(init)+"\n")
+                output.write("Seed: "+ hex(seed['seed']) +"\n")
+                output.write(f"Time: {seed['date']}\n")
+                output.write(f"Timer0: {seed['timer0']}\n")
+                output.write(f"Keypresses: {seed['keypresses']}")
+                output.write(f"IVs: {seed['stats']} \n")
+                output.write(f"Initial PIDRNG Frame: {seed['init']}\n")
                 output.write("Dust Clouds: ")
                 for x in dusts:
                     output.write(str(x)+" ")
@@ -148,5 +150,5 @@ def main(infile, outfile):
                 for x in drills:
                     output.write(str(x[1])+" ")
                 output.write("\n\n")
-    seedLst.close()
     output.close()
+    data.close()

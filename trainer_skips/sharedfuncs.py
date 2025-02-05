@@ -15,8 +15,8 @@ ranges = (
 
 def compute_times(user_hour, user_min):
     times = []
-    for i in range(max(user_hour - 2, 0), min(user_hour + 2, 24)):
-        for j in range(max(user_min - 5, 0), min(user_min + 5, 60)):
+    for i in range(max(user_hour - 1, 0), min(user_hour + 1, 24)):
+        for j in range(max(user_min - 10, 0), min(user_min + 10, 60)):
            for k in range(5,7):
                   time1 = (i, j, k)
                   times.append(time1)
@@ -31,11 +31,11 @@ def compute_times(user_hour, user_min):
 
 def rngAdvance(prev):
 	next=0x5D588B656C078965 * prev + 0x0000000000269EC3
-	return next%0x10000000000000000
+	return next #% 0x10000000000000000
 
 def rngRAdvance(prev):
     next = 0xdedcedae9638806d * prev + 0x9b1ae6e9a384e6f9
-    return next%0x10000000000000000
+    return next #% 0x10000000000000000
 
 def generate_seed(
         sha1: SHA1,
