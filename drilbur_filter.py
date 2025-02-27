@@ -128,6 +128,10 @@ def main(infile, outfile):
         if int(seed["day"]) in badDates[int(seed["month"])]:
             continue
 
+        if int(seed["second"]) not in [5, 6, 7]:
+            continue 
+
+        
         dusts = dustSearch(seed["seed"], seed["init"] + 26, seed["init"] + 40)
         if len(dusts) == 0:
             continue

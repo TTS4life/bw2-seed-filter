@@ -2,6 +2,7 @@
 
 from os import listdir, getcwd
 from os.path import isfile, join
+from file.pokefileFile import pokefileFile
 
 
 def rngAdvance(prev):
@@ -109,65 +110,52 @@ def initial_frame_bw(prng):
     return count
           
 
-def main(outfile):
+def main(infile, outfile):
 
-    output = open(outfile,"w",encoding = "UTF-8")
-    all_files = [f for f in listdir(getcwd()) if isfile(join(getcwd(), f)) ]
+    data = PokefinderFile(infile)
+    data.open()
+    seeds_analyzed = []
 
-    for file in all_files:
-        seedLst = open(file, "r+", encoding = "UTF-8")
-        next(file)
-        seedcount = 0
-        foundseeds = 0
-        for line in seedLst:
-            seedcount += 1
-            parsed = line.split("\t")
-            seed = int(parsed[0],16)
-            pup_frame = int(parsed[1])
-            ability = parsed[9]
-            nature = parsed[8]
-            time = parsed[-3]
-            timer0 = parsed[-2]
-            ivs = [parsed[10],parsed[11],parsed[12],parsed[13],parsed[14],parsed[15]]
-            keys = parsed[-1]
+    output = open(outfile, "w", encoding="UTF-8")
 
-            initial_frame = initial_frame_bw(seed)
+    while(seed := data.parseLine()):
+    
+
+        initial_frame = initial_frame_bw(seed)
 
 
-            month = int(parsed[2])
-            print(f"month {month}")
-            if month % 4 != 0:
-                print("bad month continue")
-                continue
-            date = int(parsed[3])
-            if date in badDates[month]:
-                print('bad day continue')
-                continue
+        month = int(seed["month"])
+        print(f"month {month}")
+        if month % 4 != 0:
+            print("bad month continue")
+            continue
+        date = int(seed["day"])
+        if date in badDates[month]:
+            print('bad day continue')
+            continue
 
-            pickups = pickup(seed, initial_frame)
+        pups = getPups(seed["seed"], initial_frame)
+        if(len(pups) == 0):
+            print("no pups continue")
+            continue
 
-            pups = getPups(seed, pup_frame)
-            if(len(pups) == 0):
-                print("no pups continue")
-                continue
+        foundseeds += 1
 
-            foundseeds += 1
+        output.write(f"Seed: {hex(seed["seed"])}\n")
+        output.write(f"Time: {date}\n")
+        output.write(f"Timer0: {seed["timer0"]}\n")
+        output.write(f"Keypresses: {seed["keypresses"]}\n")
+        output.write(f"IVs: {seed["stats"]} \n")
+        output.write(f"Initial Frame: {initial_frame} \n")
+        output.write("Lillipups: \n")
+        for x in pups:
+            output.write(f"{str(pups)}\n")
 
-            output.write("Seed: "+hex(seed)+"\n")
-            output.write("Time: "+time+"\n")
-            output.write("Timer0: "+timer0+"\n")
-            output.write("Keypresses: "+keys+"\n")
-            output.write("IVs: "+str(ivs)+"\n")
-            output.write("Initial Frame: "+str(initial_frame)+"\n")
-            output.write("Lillipups: \n")
-            for x in pups:
-                output.write(f"{str(pups)}\n")
-
-            output.write("Pickup: ")
-            for x in pickups:
-                output.write(f"{str(x)} \n")
-            output.write("\n")
-            output.write("\n\n")
+            # output.write("Pickup: ")
+            # for x in pickups:
+            #     output.write(f"{str(x)} \n")
+            # output.write("\n")
+            # output.write("\n\n")
 
         seedLst.close()
         output.close()
