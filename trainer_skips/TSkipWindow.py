@@ -2,7 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 from numba_pokemon_prngs.enums import Language, Game, DSType
-from trainer_skips import w2_thewholeskip
+from trainer_skips import w2_thewholeskip, thewholeskip
+from trainer_skips.Parameters import parameters
 
 game_version_cb = None
 game_language = None
@@ -14,6 +15,7 @@ dowCombo= None
 eTimer0 = None
 errText = None
 
+parameters = parameters()
 
 def createTSkipWindow(window):
     global game_version_cb, game_language, mac_addr, eYear, mCombo, domCombo, dowCombo, eTimer0, errText
@@ -35,9 +37,8 @@ def createTSkipWindow(window):
     #Game version 
     ttk.Label(window, text="Version").grid(row=0, column=0)
 
-    gv = tk.StringVar()
     game_version_cb = ttk.Combobox(window, width=27, state="readonly")
-    game_version_cb['values'] = ( 'White 2', 'Black 2')
+    game_version_cb['values'] = ( 'Black', 'White', 'Black 2', 'White 2')
     game_version_cb.grid(row=0, column=1, padx=10, pady=10)
     game_version_cb.current(0)
 
@@ -99,21 +100,44 @@ def createTSkipWindow(window):
 
     window.mainloop()
 
+def mapDOW(params, combo):
+    match combo.get():
+        case "Monday":
+            params.DOW = 1
+        case "Tuesday":
+            params.DOW = 2
+        case "Wednesday":
+            params.DOW = 3
+        case "Thursday":
+            params.DOW = 4
+        case "Friday":
+            params.DOW = 5
+        case "Saturday":
+            params.DOW = 6
+        case "Sunday":
+            params.DOW = 0
+
+def mapGame(params, combo):
+    match combo.get():
+        case "Black":
+            params.Version = Game.BLACK
+        case "White":
+            params.Version = Game.WHITE
+        case "Black 2":
+            params.Version = Game.BLACK2
+        case "White 2":
+            params.Version = Game.WHITE2
+
+def mapLanguage(params, combo):
+    match combo.get():
+        case "English":
+            params.Language = Language.ENGLISH
+        case "Japanese":
+            params.Language = Language.JAPANESE
 
 def run():
-    global gv, gl, errText
-    
-    if game_version_cb.get() == "Black 2":
-        gv = Game.BLACK2
-    else:
-        gv = Game.WHITE2
+    global errText
 
-    if(game_language.get() == 'English'):
-        gl = Language.ENGLISH
-    else:
-        gl = Language.JAPANESE
-
-    print(gv, gl)
 
     try:
         outfile = filedialog.asksaveasfilename(initialfile="trainerskip.txt", defaultextension=".txt")
@@ -129,39 +153,36 @@ def run():
         print('bad input')
         errText.set("Bad Input.")
         return
-    
-    dow = 0
 
-    match dowCombo.get():
-        case "Monday":
-            dow = 1
-        case "Tuesday":
-            dow = 2
-        case "Wednesday":
-            dow = 3
-        case "Thursday":
-            dow = 4
-        case "Friday":
-            dow = 5
-        case "Saturday":
-            dow = 6
-        case "Sunday":
-            dow = 0
+
+    #DOW
+    mapDOW(parameters, dowCombo)
+
+    #Version
+    mapGame(parameters, game_version_cb)
+
+    #Language
+    mapLanguage(parameters, game_language)
     
     
     errText.set("Searching...")
-    
-    w2_thewholeskip.main(
-        gv, 
-        gl,
-        eYear.get(),
-        mCombo.get(),
-        domCombo.get(),
-        dow,
-        mac_addr.get(),
-        eTimer0.get(),
-        outfile
-    )
+
+    parameters.Year = int(eYear.get())
+    parameters.Month = int(mCombo.get())
+    parameters.Day = int(domCombo.get())
+    parameters.MAC = int(mac_addr.get(), 16)
+    parameters.Timer0Min = int(eTimer0.get(), 16)
+
+    if game_version_cb in ('Black', 'White'):
+        thewholeskip.main(
+            parameters,
+            outfile
+        )
+    else:
+        w2_thewholeskip.main(
+            parameters,
+            outfile
+        )
 
     errText.set("Done!")
 

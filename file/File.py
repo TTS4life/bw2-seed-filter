@@ -11,7 +11,7 @@ class File(ABC):
 			self.file = open(self.filename)
 			self.file.readline() #Trash header line
 		except:
-			# raise Exception("File not found")
+			raise Exception("File not found")
 			return False
 		
 		return True

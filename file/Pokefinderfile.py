@@ -9,10 +9,12 @@ class PokefinderFile(File):
     def parseLine(self):
         data = super().parseLine()
 
-        if data == "":
+        if data == "" or data[0] == "\n":
             return False
 
         parsed = data.split("\t")
+
+        # print(parsed)
 
         date = re.findall(r'\d+', parsed[-3])
 

@@ -3,7 +3,7 @@ import numpy as np
 from numba_pokemon_prngs.sha1 import SHA1
 from numba_pokemon_prngs.enums import Language, Game, DSType
 
-test = False
+test = True
 
 ranges = (
     (-5, 5, -5, 5), # default case
@@ -31,11 +31,11 @@ def compute_times(user_hour, user_min):
 
 def rngAdvance(prev):
 	next=0x5D588B656C078965 * prev + 0x0000000000269EC3
-	return next #% 0x10000000000000000
+	return next % 0x10000000000000000
 
 def rngRAdvance(prev):
     next = 0xdedcedae9638806d * prev + 0x9b1ae6e9a384e6f9
-    return next #% 0x10000000000000000
+    return next % 0x10000000000000000
 
 def generate_seed(
         sha1: SHA1,

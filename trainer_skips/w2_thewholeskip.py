@@ -13,6 +13,8 @@ else:
     from trainer_skips.keypresses import *
     from trainer_skips.sharedfuncs import * 
 
+# from trainer_skips import Parameters
+
 test = False
 user_year = None
 user_month = None
@@ -23,6 +25,8 @@ user_keypress = None
 sha1 = None
 precompute = None
 times = []
+
+debug = False
 
 valid_route21_tiles = {                               (4,214), (4,213), (4,212), (4,211), (4,210), (4,209), (4,208), 
                            (5,217), (5,216), (5,215), (5,214), (5,213), (5,212), (5,211), (5,210), (5,209), (5,208),
@@ -147,7 +151,6 @@ def multi_cloud(seed):
     fourth_skip_indices = []
     for i in range(500):
         seed = rngAdvance(seed)
-        #print(hex(seed))
         temp = seed
         if (((temp >> 32) * 1000) >> 32) < 100:
             success += 1
@@ -158,6 +161,7 @@ def multi_cloud(seed):
             cloud_states.append(pair)
 
             # [ [ All cloud frames ], [], [], ... [ cloud frame, frame seed ] ]
+    print(success)
     return [clouds, first_skip_indices, second_skip_indices, third_skip_indices, fourth_skip_indices, cloud_states]
 
 def seed_frame(seed):
@@ -173,6 +177,9 @@ def skip_checker(states_array, frame):
     one = [] #clouds of valid skip
     two = []
     extra_clouds = [] # for testing, see extra clouds in a seed
+
+    print(len(states_array))
+
     for states in states_array:
         state_index = states[0] # RNG Frame of cloud
 
@@ -208,6 +215,8 @@ def skip_checker(states_array, frame):
 
     comparison = [first, second]
 
+    # print(comparison)
+
     if comparison == [1,1]:  
         if(len(two) > 1):  
             return True, one, two
@@ -227,6 +236,7 @@ def wholeskip(outfile):
 
     file = open(outfile, "w")
 
+    print(len(times))
     for presses in keypresses:
 
         if illegal_keypresses(presses[1]):
@@ -237,6 +247,10 @@ def wholeskip(outfile):
             sha1.set_time(*time)
             seed = sha1.hash_seed(precompute)
 
+            # print(hex(seed))
+
+            if(hex(seed) == 0x33960b0a8db0e38f):
+                exit()
 
             ret = multi_cloud(seed)
             cloud_states = ret[5] #[[frame, rng value of frame], ...]
@@ -252,16 +266,14 @@ def wholeskip(outfile):
 
     file.close()
 
-def main(version, language, year, month, day, dow, mac, timer0, outfile):
-    global user_year, user_month, user_day, user_dow, user_mac, user_keypress, sha1, precompute, times
-    user_year= int(year)
-    user_month= int(month)
-    user_day= int(day)
-    user_dow = int(dow)
-    user_mac = int(mac, 16)
-    timer0 = int(timer0, 16)
-    user_hour = 1
-    user_min = 6
+def main(parameters, outfile):
+    global sha1, precompute, times
+ 
+    if(debug):
+        print(f"{parameters.__dict__}")
+
+    user_hour = 17
+    user_min = 8
     #user_keypress = int(input("Enter keypress choice. Enter 0 for 0-2 keypresses, enter 1 for 3-4 keypresses"))
     #user_hour = int(input("Enter hour you are at near skip"))
     #user_min = int(input("enter minute near skip"))
@@ -271,9 +283,18 @@ def main(version, language, year, month, day, dow, mac, timer0, outfile):
     times = compute_times(user_hour, user_min)
 
     print("generating RNG...")
-    sha1 = SHA1(version = version, language = language, ds_type=DSType.DS, mac = user_mac, soft_reset=False, v_frame= 8, gx_state=6)
-    sha1.set_timer0(timer0, 0x82)
-    date = (user_year, user_month, user_day, user_dow)
+
+
+    sha1 = SHA1(version = parameters.Version, 
+                language = parameters.Language, 
+                ds_type = parameters.DSType, 
+                mac = parameters.MAC, 
+                soft_reset = False, 
+                v_frame = 8, 
+                gx_state = 6 )
+    
+    sha1.set_timer0(parameters.Timer0Min, parameters.VCount)
+    date = (parameters.Year, parameters.Month, parameters.Day, parameters.DOW)
     sha1.set_date(*date)
     precompute = sha1.precompute()
 
