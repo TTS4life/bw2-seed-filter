@@ -161,7 +161,6 @@ def multi_cloud(seed):
             cloud_states.append(pair)
 
             # [ [ All cloud frames ], [], [], ... [ cloud frame, frame seed ] ]
-    print(success)
     return [clouds, first_skip_indices, second_skip_indices, third_skip_indices, fourth_skip_indices, cloud_states]
 
 def seed_frame(seed):
@@ -177,8 +176,6 @@ def skip_checker(states_array, frame):
     one = [] #clouds of valid skip
     two = []
     extra_clouds = [] # for testing, see extra clouds in a seed
-
-    print(len(states_array))
 
     for states in states_array:
         state_index = states[0] # RNG Frame of cloud
@@ -215,10 +212,8 @@ def skip_checker(states_array, frame):
 
     comparison = [first, second]
 
-    # print(comparison)
-
     if comparison == [1,1]:  
-        if(len(two) > 1):  
+        if(len(two) > 1 and len(one) > 1):       # Make sure there's at least 2 phenomenon each
             return True, one, two
 
     return False, [], []
@@ -236,21 +231,17 @@ def wholeskip(outfile):
 
     file = open(outfile, "w")
 
-    print(len(times))
-    for presses in keypresses:
+    for time in times:
 
-        if illegal_keypresses(presses[1]):
-            continue
 
-        for time in times:
+        for presses in keypresses:
+            if illegal_keypresses(presses[1]):
+                continue
+            
+            
             sha1.set_button(presses[0])
             sha1.set_time(*time)
             seed = sha1.hash_seed(precompute)
-
-            # print(hex(seed))
-
-            if(hex(seed) == 0x33960b0a8db0e38f):
-                exit()
 
             ret = multi_cloud(seed)
             cloud_states = ret[5] #[[frame, rng value of frame], ...]
@@ -268,22 +259,13 @@ def wholeskip(outfile):
 
 def main(parameters, outfile):
     global sha1, precompute, times
- 
-    if(debug):
-        print(f"{parameters.__dict__}")
-
-    user_hour = 17
-    user_min = 8
-    #user_keypress = int(input("Enter keypress choice. Enter 0 for 0-2 keypresses, enter 1 for 3-4 keypresses"))
-    #user_hour = int(input("Enter hour you are at near skip"))
-    #user_min = int(input("enter minute near skip"))
 
     print("initializing...")
     print("computing times...")
-    times = compute_times(user_hour, user_min)
+
+    times = compute_times()
 
     print("generating RNG...")
-
 
     sha1 = SHA1(version = parameters.Version, 
                 language = parameters.Language, 

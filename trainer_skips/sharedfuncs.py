@@ -3,7 +3,7 @@ import numpy as np
 from numba_pokemon_prngs.sha1 import SHA1
 from numba_pokemon_prngs.enums import Language, Game, DSType
 
-test = True
+test = False
 
 ranges = (
     (-5, 5, -5, 5), # default case
@@ -22,12 +22,14 @@ def compute_times(user_hour, user_min):
                   times.append(time1)
     return times
 
-# def compute_times():
-#     times = []
-#     for i in range(0, 24):
-#         for j in range(0, 60):
-#             for k in range(5,7):
-#                  times.apeend((i, j, k)) 
+def compute_times():
+    times = []
+    for i in range(0, 24):
+        for j in range(0, 60):
+            for k in range(5,7):
+                 times.append((i, j, k)) 
+    
+    return times
 
 def rngAdvance(prev):
 	next=0x5D588B656C078965 * prev + 0x0000000000269EC3
