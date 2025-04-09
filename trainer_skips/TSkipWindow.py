@@ -175,12 +175,15 @@ def run():
     parameters.MAC = int(mac_addr.get(), 16)
     parameters.Timer0Min = int(eTimer0.get(), 16)
 
-    if game_version_cb in ('Black', 'White'):
+    if game_version_cb.get() in ('Black', 'White'):
+
+        print("BW1")
         thewholeskip.main(
             parameters,
             outfile
         )
     else:
+        print(f"BW2? {game_version_cb}")
         w2_thewholeskip.main(
             parameters,
             outfile

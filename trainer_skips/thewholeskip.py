@@ -27,6 +27,8 @@ from numba_pokemon_prngs.enums import Language, Game, DSType
 
 from keypresses import *
 
+from trainer_skips.sharedfuncs import *
+
 user_year= None
 user_month= None
 user_day= None
@@ -44,13 +46,13 @@ ranges = (
     (-5, 5, 0, 5)
 )
 
-def rngAdvance(prev):
-	next=0x5D588B656C078965 * prev + 0x0000000000269EC3
-	return next
+# def rngAdvance(prev):
+# 	next=0x5D588B656C078965 * prev + 0x0000000000269EC3
+# 	return next
 
-def rngRAdvance(prev):
-    next = 0xdedcedae9638806d * prev + 0x9b1ae6e9a384e6f9
-    return next
+# def rngRAdvance(prev):
+#     next = 0xdedcedae9638806d * prev + 0x9b1ae6e9a384e6f9
+#     return next
 
 table = [[50, 100, 100, 100], [50, 50, 100, 100], [30, 50, 100, 100],[25, 30, 50, 100], [20, 25, 33, 50]]
 
@@ -78,17 +80,6 @@ def initial_frame_bw(prng):
         count += num
 
     return count
-
-
-#for buttons_pressed in itertools.product(*((False, True) for _ in range(4))):
-#    for button_pressed in buttons_pressed:
-#        if button_pressed:
-#            keypress_value = base - value_array
-#    print(buttons_pressed)
-
-
-    
-
 
 #usable_first_skip_tiles = [(47, 35), (47, 36), (48,34), (48, 35), (48, 36),(49,34), (49, 35), (49, 36), (50, 35), (50, 34), (51, 35), (51, 34), (52, 35), (52, 34), (53, 35), (53, 34), (54, 35), (54, 34)]
 #usable_second_skip_tiles = [(49, 22), (49, 23), (49, 24), (49, 25), (49, 26), (49, 27),(50, 22), (49, 23), (49, 24), (49, 25), (49, 26), (49, 27)]
@@ -187,7 +178,6 @@ def multi_cloud(seed):
     fourth_skip_indices = []
     for i in range(500):
         seed = rngAdvance(seed)
-        #print(hex(seed))
         temp = seed
         if (((temp >> 32) * 1000) >> 32) < 100:
             success += 1
@@ -206,6 +196,7 @@ def seed_frame(seed):
 def skip_checker(states_array, initial_frame):
     first, second, third, fourth, fifth = 0, 0, 0, 0, 0
     one, two, three, four, five = [], [], [], [], []
+
     for states in states_array:
         state_index = states[0] #RNG frame of cloud
 
@@ -259,17 +250,19 @@ def skip_checker(states_array, initial_frame):
     comparison = [first, second, third, fourth, fifth]
     skips = [initial_frame, set(one), set(two), set(three), set(four), set(five)]
 
+    if comparison[2] == 1:
+        print(comparison)
 
-    # print(comparison)
     if comparison == [1,1,1,1,1]:
-        #print("this seed fucking works")
-            print(skips)
-            return True
+            print("Found a skip")
+            return True, skips
+    
+    return False, []
 
     
 
 times = []
-for i in[4, 5, 6, 7, 8, 23]:
+for i in range(0, 8):
     for j in range(0,60):
            for k in range(5,7):
                   time1 = (i, j, k)
@@ -278,66 +271,65 @@ for i in[4, 5, 6, 7, 8, 23]:
 
 
 
-def wholeskip():
+def wholeskip(outfile):
+    global sha1
+
+    file = open(outfile, "w")
+
     seeds_searched = 0
     seeds_found = 0
-    for time in times:
 
+    for time in times:
         for presses in keypresses:
+             
+            if illegal_keypresses(presses[1]):
+                continue
+
             sha1.set_button(presses[0])
             sha1.set_time(*time)
             seed = sha1.hash_seed(precompute)
-            # print(hex(seed))
+            
+            # print(f"{hex(seed)}\n")
+            
             seeds_searched = seeds_searched + 1
             ret = multi_cloud(seed)
             cloud_states = ret[5]
             init = initial_frame_bw(seed)
-            if skip_checker(cloud_states, init):
+            valid_skip, clouds = skip_checker(cloud_states, init)
+            if(valid_skip) == True:
+                output = f"{hex(seed)} {time[0]}:{time[1]}:{time[2]} {presses[1]}\n {[str(l) for l in clouds]}\n\n"
+                print(output)
+                file.write(output)
                 seeds_found = seeds_found + 1
-                print(time, hex(seed), presses[1])
 
-    print(f"Found {seeds_found} seeds out of {seeds_searched}")
+    file.write(f"\n Found {seeds_found} out of {seeds_searched} seeds")
+    file.close()
 
 # wholeskip()
 
 # t = input("Press enter to quit: ")
 # t
 
-def main():
-    global sha1, precompute
-    print("Welcome to Plasma 5 skip generator")
-    print("Do note that this is intended for NDS and NDS emulators only.")
-    print("After configuring your parameters, you will get an output like this: ")
-    print("[[(96, (48, 34))], [(156, (49, 23)), (170, (49, 23))], [(242, (54, 13))], [(320, (47, 5)), (320, (45, 7)), (356, (45, 7)), (358, (45, 7))]] \n (19, 40, 6) 0x2d87c473533530c2 ['R', 'L', 'X']")
-    print("Each set of numbers is to be interpreted as \n (PIDFRAME, (X coord, Y Coord)), where, for the cloud to spawn in an intended place, \n you will walk onto tile (x,y) on frame PIDFRAME at the same time \n your cloud step counter hits 20")
-    print("Followed by the date/time, the seed itself for routing/testing, and keypresses required to hit the seed")
-    user_year= int(input("Enter Year: "))
-    user_month= int(input("Enter Month: "))
-    user_day= int(input("Enter Day: "))
-    user_dow = int(input("Enter day of week (Monday = 1, Tuesday = 2, etc): "))
-    user_mac = int(input("Enter MAC Address as Hex "), 16)
-    # user_vframe = int(input("Enter VFrame "))
-    # user_gx_state = int(input("Enter gx_stat "))
-    # user_vcount = int(input("Enter VCount "), 16)
-    # user_timer0 = int(input("Enter Timer0 "), 16)
+def main(parameters, outfile):
+    global sha1, precompute, times
 
-    tmp = int(input("Press 1 for Black, 2 for White"))
-    if tmp == 1:
-        user_version = Game.BLACK
-    elif tmp == 2:
-        user_version = Game.WHITE
-    else:
-        print("Unknown input, Black defaulted")
-        user_version = Game.BLACK
+    times = compute_times()
 
-    sha1 = SHA1(version = Game.WHITE, language = Language.ENGLISH, ds_type=DSType.DS, mac = user_mac, soft_reset=False, v_frame=8, gx_state=6)
-    # timer0 = user_timer0
-    sha1.set_timer0(0xc7f, 0x60)
-    date = (user_year, user_month, user_day, user_dow)
+    sha1 = SHA1(version = parameters.Version, 
+                language = parameters.Language, 
+                ds_type = parameters.DSType, 
+                mac = parameters.MAC, 
+                soft_reset = False, 
+                v_frame = 8, 
+                gx_state = 6 )
+
+    sha1.set_timer0(parameters.Timer0Min, 0x60)
+    date = (parameters.Year, parameters.Month, parameters.Day, parameters.DOW)
     sha1.set_date(*date)
     precompute = sha1.precompute()
-    print("Start!")
-    wholeskip()
+
+    print("Searching...")
+    wholeskip(outfile)
 
 def test():
     seed = 0x6fef814e65d4da49 
