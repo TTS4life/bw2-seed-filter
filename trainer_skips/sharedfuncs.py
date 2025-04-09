@@ -13,6 +13,10 @@ ranges = (
     (-5, 5, 0, 5) #below player
 )
 
+def illegal_keypresses(keypresses):
+    return ( 'Up' in keypresses and 'Down' in keypresses ) or ( 'Left' in keypresses and 'Right' in keypresses )
+
+
 def compute_times(user_hour, user_min):
     times = []
     for i in range(max(user_hour - 1, 0), min(user_hour + 1, 24)):

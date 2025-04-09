@@ -223,9 +223,6 @@ def skip_checker(states_array, frame):
 
 keypress_fake = [[0xdf290000, "custom"]]
 
-def illegal_keypresses(keypresses):
-    return ( 'Up' in keypresses and 'Down' in keypresses ) or ( 'Left' in keypresses and 'Right' in keypresses )
-
 def wholeskip(outfile):
     global sha1
 
