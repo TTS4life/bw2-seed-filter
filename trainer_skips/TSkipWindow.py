@@ -14,12 +14,14 @@ domCombo = None
 dowCombo= None
 eTimer0 = None
 errText = None
+Twindow = None
 
 parameters = parameters()
 
 def createTSkipWindow(window):
-    global game_version_cb, game_language, mac_addr, eYear, mCombo, domCombo, dowCombo, eTimer0, errText
+    global game_version_cb, game_language, mac_addr, eYear, mCombo, domCombo, dowCombo, eTimer0, errText, Twindow
 
+    Twindow = window
 
     window.title("Trainer Skips")
     window.geometry("500x450")
@@ -136,16 +138,14 @@ def mapLanguage(params, combo):
             params.Language = Language.JAPANESE
 
 def run():
-    global errText
+    global errText, Twindow
 
 
     try:
         outfile = filedialog.asksaveasfilename(initialfile="trainerskip.txt", defaultextension=".txt")
     except:
         return
-    
-    print(eYear.get(), mCombo.get(), domCombo.get(), dowCombo.get(), eTimer0.get(), mac_addr.get())
-    print(mac_addr.get().isnumeric())
+
 
     if(not eYear.get().isnumeric() or not mCombo.get().isnumeric() or not domCombo.get().isnumeric()
       # or not eTimer0.get().isnumeric() #or not mac_addr.get().isnumeric()
@@ -166,6 +166,8 @@ def run():
     
     
     errText.set("Searching...")
+
+    Twindow.update()
 
     parameters.Year = int(eYear.get())
     parameters.Month = int(mCombo.get())
