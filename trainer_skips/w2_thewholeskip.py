@@ -220,9 +220,6 @@ def skip_checker(states_array, frame):
 
 
 
-
-keypress_fake = [[0xdf290000, "custom"]]
-
 def wholeskip(outfile):
     global sha1
 
@@ -249,8 +246,11 @@ def wholeskip(outfile):
             if valid_skip is True:
                 # print(time, hex(seed), init, presses[1], "first ", first, " second ", second)
 
-                output = f"{time[0]}:{time[1]}:{time[2]} {hex(seed)}\n {init} {presses[1]} \n first {len(first)} {first} \n second {len(second)} {second}\n\n"
-                file.write(output)
+                seed_info = f"{time[0]}:{time[1]}:{time[2]} {hex(seed)} {init} {presses[1]}\n"
+
+                write_seed_output(file, seed_info, [first, second])
+                # output = f"{time[0]}:{time[1]}:{time[2]} {hex(seed)}\n {init} {presses[1]} \n first {len(first)} {first} \n second {len(second)} {second}\n\n"
+                
 
     file.close()
 

@@ -81,17 +81,8 @@ def initial_frame_bw(prng):
 
     return count
 
-#usable_first_skip_tiles = [(47, 35), (47, 36), (48,34), (48, 35), (48, 36),(49,34), (49, 35), (49, 36), (50, 35), (50, 34), (51, 35), (51, 34), (52, 35), (52, 34), (53, 35), (53, 34), (54, 35), (54, 34)]
-#usable_second_skip_tiles = [(49, 22), (49, 23), (49, 24), (49, 25), (49, 26), (49, 27),(50, 22), (49, 23), (49, 24), (49, 25), (49, 26), (49, 27)]
-#usable_third_skip_tiles = [(56, 15), (54, 15), (55, 12), (55, 14), (56, 13), (54, 13), (56, 17), (56, 19)]
-#usable_fourth_skip_tiles = [(46, 4), (45, 5), (47, 5), (46, 6), (45, 7), (46, 7), (46, 8), (45, 9), (47, 9)]
-
 # below are fast tiles
 usable_first_skip_tiles = [(48, 34)]
-# usable_first_skip_tiles = [(55, 52), (55,53), (55,51), (54,51), (54,52), (54,53), (56,52),(56,51), (56,53),
-                        #    (56,49),
-                        #    (56, 50), (55,50), (54,50)]
-
 usable_second_skip_tiles = [(49, 23)]
 usable_third_skip_tiles = [(54, 13), (55, 14)]
 usable_fifth_skip_tiles = [(45,8), (47,8), (47,6), (47,4), (45,4)]
@@ -99,16 +90,11 @@ usable_fourth_skip_tiles = [(43,11), (43,13), (44,14)]
 
 
 # these are tiles where a cloud should spawn for a valid skip
-
 usable_first_cloud_tiles = [(49, 33), (50, 33), (51, 33)]
-
 usable_second_cloud_tiles = [(50, 21), (51, 21), (52, 21)]
-# usable_third_cloud_tiles = [(53, 13), (53, 14)]
 usable_third_cloud_tiles = [(53, 14)]
 usable_fourth_cloud_tiles = [(44,9)]
 usable_fifth_cloud_tiles = [(48, 5), (48, 6), (48, 7), (48, 8)]
-
-# below is the optimal tile
 
 
 
@@ -248,13 +234,9 @@ def skip_checker(states_array, initial_frame):
 
 
     comparison = [first, second, third, fourth, fifth]
-    skips = [initial_frame, set(one), set(two), set(three), set(four), set(five)]
-
-    if comparison[2] == 1:
-        print(comparison)
+    skips = [list(set(one)), list(set(two)), list(set(three)), list(set((four))), list(set((five)))]
 
     if comparison == [1,1,1,1,1]:
-            print("Found a skip")
             return True, skips
     
     return False, []
@@ -296,10 +278,11 @@ def wholeskip(outfile):
             cloud_states = ret[5]
             init = initial_frame_bw(seed)
             valid_skip, clouds = skip_checker(cloud_states, init)
+
             if(valid_skip) == True:
-                output = f"{hex(seed)} {time[0]}:{time[1]}:{time[2]} {presses[1]}\n {[str(l) for l in clouds]}\n\n"
-                print(output)
-                file.write(output)
+                print("Found one!")
+                seed_info = f"{time[0]}:{time[1]}:{time[2]} {hex(seed)} {init} {presses[1]}\n"
+                write_seed_output(file, seed_info, clouds)
                 seeds_found = seeds_found + 1
 
     file.write(f"\n Found {seeds_found} out of {seeds_searched} seeds")

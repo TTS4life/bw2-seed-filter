@@ -109,3 +109,15 @@ def cloud_location_finder(rngstate, coords, tileset):
               )
     
     return ((dust_cloud_x, dust_cloud_y), quadrant)
+
+
+def write_seed_output(file, seed_info, cloud_sets):
+    file.write(seed_info)
+
+    for i, clouds in enumerate(cloud_sets):
+        file.write(f"{i+1}: ")
+        for cloud in clouds:
+            file.write(f"{cloud} ")
+        file.write("\n")
+
+    file.write("\n")
