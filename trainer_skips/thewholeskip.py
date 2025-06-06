@@ -92,7 +92,7 @@ usable_fourth_skip_tiles = [(43,11), (43,13), (44,14)]
 # these are tiles where a cloud should spawn for a valid skip
 usable_first_cloud_tiles = [(49, 33), (50, 33), (51, 33)]
 usable_second_cloud_tiles = [(50, 21), (51, 21), (52, 21)]
-usable_third_cloud_tiles = [(53, 14)]
+usable_third_cloud_tiles = [(53, 14), (53,13)]
 usable_fourth_cloud_tiles = [(44,9)]
 usable_fifth_cloud_tiles = [(48, 5), (48, 6), (48, 7), (48, 8)]
 
@@ -280,7 +280,7 @@ def wholeskip(outfile):
             valid_skip, clouds = skip_checker(cloud_states, init)
 
             if(valid_skip) == True:
-                print("Found one!")
+                print("Found one! ", {seeds_found}, " out of ", {seeds_searched}, " seeds")
                 seed_info = f"{time[0]}:{time[1]}:{time[2]} {hex(seed)} {init} {presses[1]}\n"
                 write_seed_output(file, seed_info, clouds)
                 seeds_found = seeds_found + 1
