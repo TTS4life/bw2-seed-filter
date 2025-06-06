@@ -30,4 +30,15 @@ class parameters:
         self.VCount = 0x82
         self.Timer0Min = 0x10F2
         self.Timer0Max = 0x10F4
+        
+    def setJPNB1(self):
+        self.VCount = 0x60
+        self.GxStat = 0x6
+        self.Timer0Min = 0xC79
+        self.timer0Max = 0xC7A
+    
+    def setJPNW2(self):
+        self.VCount = 0x82
+        self.Timer0Min = 0x10F7
+        self.timer0Max = 0x10FB
 
