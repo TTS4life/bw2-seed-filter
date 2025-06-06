@@ -83,7 +83,7 @@ def initial_frame_bw(prng):
 
 # below are fast tiles
 usable_first_skip_tiles = [(48, 34)]
-usable_second_skip_tiles = [(49, 23)]
+usable_second_skip_tiles = [(49, 23), (50,24)]
 usable_third_skip_tiles = [(54, 13), (55, 14)]
 usable_fifth_skip_tiles = [(45,8), (47,8), (47,6), (47,4), (45,4)]
 usable_fourth_skip_tiles = [(43,11), (43,13), (44,14)]
