@@ -37,8 +37,15 @@ class parameters:
         self.Timer0Min = 0xC79
         self.timer0Max = 0xC7A
     
+    def setJPNW1(self):
+        self.VCount = 0x5f
+        self.GxStat = 0x6
+        self.Timer0Min = 0xc67
+        self.timer0Max = 0xc77
+    
     def setJPNW2(self):
         self.VCount = 0x82
+        self.GxStat = 0x6
         self.Timer0Min = 0x10F7
         self.timer0Max = 0x10FB
 
