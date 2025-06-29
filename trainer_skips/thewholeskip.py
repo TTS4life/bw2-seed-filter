@@ -83,8 +83,8 @@ def initial_frame_bw(prng):
 
 # below are fast tiles
 usable_first_skip_tiles = [(48, 34)]
-usable_second_skip_tiles = [(49, 23), (50,24)]
-usable_third_skip_tiles = [(54, 13), (55, 14)]
+usable_second_skip_tiles = [(49, 23), (50, 24)]
+usable_third_skip_tiles = [(54, 13), (55, 12)]
 usable_fifth_skip_tiles = [(45,8), (47,8), (47,6), (47,4), (45,4)]
 usable_fourth_skip_tiles = [(43,11), (43,13), (44,14)]
 
@@ -196,7 +196,7 @@ def skip_checker(states_array, initial_frame):
                     
         for valid_first in one:
             first_frame = valid_first[0]
-            if state_index < first_frame + 85 and  state_index > first_frame + 60 and ((state_index - initial_frame) % 2 == 0):
+            if state_index < first_frame + 85 and  state_index > first_frame + 50 and ((state_index - initial_frame) % 2 == 0):
                 for second_coords in usable_second_skip_tiles:
                     comparison_2 = chargestone_clouds(states[1], second_coords)
                     if comparison_2 != "No dust cloud" and (comparison_2 in usable_second_cloud_tiles):
@@ -243,12 +243,12 @@ def skip_checker(states_array, initial_frame):
 
     
 
-times = []
-for i in range(0, 8):
-    for j in range(0,60):
-           for k in range(5,7):
-                  time1 = (i, j, k)
-                  times.append(time1)
+# times = []
+# for i in range(0, 8):
+#     for j in range(0,60):
+#            for k in range(5,7):
+#                   time1 = (i, j, k)
+#                   times.append(time1)
 
 
 
@@ -261,8 +261,8 @@ def wholeskip(outfile):
     seeds_searched = 0
     seeds_found = 0
 
-    for time in times:
-        for presses in keypresses:
+    for presses in keypresses:  # 外側ループ：keypresses
+        for time in times:      # 内側ループ：times
              
             if illegal_keypresses(presses[1]):
                 continue
@@ -306,13 +306,14 @@ def main(parameters, outfile):
                 v_frame = 8, 
                 gx_state = 6 )
 
-    sha1.set_timer0(parameters.Timer0Min, 0x60)
+    sha1.set_timer0(parameters.Timer0Min, parameters.VCount)
     date = (parameters.Year, parameters.Month, parameters.Day, parameters.DOW)
     sha1.set_date(*date)
     precompute = sha1.precompute()
 
     print("Searching...")
     wholeskip(outfile)
+    print("Done!")
 
 def test():
     seed = 0x6fef814e65d4da49 

@@ -164,6 +164,17 @@ def run():
     #Language
     mapLanguage(parameters, game_language)
     
+    # ゲームバージョンと言語に応じて適切な設定を適用
+    if game_version_cb.get() == "Black" and game_language.get() == "English":
+        parameters.setENGB1()
+    elif game_version_cb.get() == "White" and game_language.get() == "Japanese":
+        parameters.setJPNW1()
+    elif game_version_cb.get() == "Black" and game_language.get() == "Japanese":
+        parameters.setJPNB1()
+    elif game_version_cb.get() == "White 2" and game_language.get() == "English":
+        parameters.setENGW2()
+    elif game_version_cb.get() == "White 2" and game_language.get() == "Japanese":
+        parameters.setJPNW2()
     
     errText.set("Searching...")
 
