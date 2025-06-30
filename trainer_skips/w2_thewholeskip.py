@@ -6,6 +6,7 @@ from numba_pokemon_prngs.lcrng import BWRNG
 import itertools
 from numba_pokemon_prngs.sha1 import SHA1
 from numba_pokemon_prngs.enums import Language, Game, DSType
+import pandas as pd
 if __name__ == '__main__':
     from keypresses import *
     from sharedfuncs import *
@@ -193,10 +194,10 @@ def skip_checker(states_array, frame):
 
 
 
-def wholeskip(outfile, parameters):
+def wholeskip(outfile_xlsx, parameters):
     global sha1
 
-    file = open(outfile, "w", encoding="utf-8")
+    results = []
     seeds_searched = 0
     seeds_found = 0
 
@@ -221,15 +222,18 @@ def wholeskip(outfile, parameters):
             valid_skip, first, second = skip_checker(cloud_states, init)
 
             if valid_skip:
-                seed_info = f"{time[0]}:{time[1]}:{time[2]} {hex(seed)} {init} {presses[1]}\n"
-                write_seed_output(file, seed_info, [first, second])
+                row = write_seed_output_excel(
+                    time[0], time[1], time[2], seed, init, presses[1], first, second, False, ""
+                )
+                results.append(row)
                 seeds_found += 1
 
-    file.write(f"\n Found {seeds_found} out of {seeds_searched} seeds")
-    file.close()
+    df = pd.DataFrame(results)
+    df.to_excel(outfile_xlsx, index=False)
+    print(f"\n Found {seeds_found} out of {seeds_searched} seeds")
 
 
-def main(parameters, outfile):
+def main(parameters, outfile_xlsx):
     global sha1, precompute, times
 
     print("initializing...")
@@ -246,7 +250,7 @@ def main(parameters, outfile):
                 v_frame = np.uint8(8),
                 gx_state = np.uint8(6))
     print("Searching...")
-    wholeskip(outfile, parameters)
+    wholeskip(outfile_xlsx, parameters)
 
 def test_multicloud():
     clouds = multi_cloud(0x1111111111111111)

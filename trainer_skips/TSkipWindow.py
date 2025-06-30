@@ -55,7 +55,7 @@ def createTSkipWindow(window):
     parameters_instance = parameters()  # インスタンスを作成
 
     window.title("Trainer Skips")
-    window.geometry("500x600")  # 高さを少し増やす
+    window.geometry("500x550")
     style = ttk.Style(window)
     window.config(bg="#26242f")
     style.theme_use('clam')
@@ -184,7 +184,12 @@ def run():
     global errText, Twindow, eYear, mCombo, domCombo, mac_addr, eTimer0, eHour, eMinute, game_version_cb, game_language, parameters_instance, compute_time_spring_var
 
     try:
-        outfile = filedialog.asksaveasfilename(initialfile="trainerskip.txt", defaultextension=".txt")
+        # バージョンによって保存ダイアログと拡張子を分岐
+        game_name = game_version_cb.get() if game_version_cb else None
+        if game_name in ('Black', 'White'):
+            outfile = filedialog.asksaveasfilename(initialfile="trainerskip.txt", defaultextension=".txt")
+        else:
+            outfile = filedialog.asksaveasfilename(initialfile="trainerskip.xlsx", defaultextension=".xlsx")
     except:
         return
 
@@ -279,7 +284,6 @@ def run():
     parameters_instance.use_time_spring = compute_time_spring_var.get()
 
     if game_version_cb.get() in ('Black', 'White'):
-
         print("BW1")
         thewholeskip.main(
             parameters_instance,

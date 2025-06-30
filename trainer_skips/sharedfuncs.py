@@ -120,14 +120,26 @@ def cloud_location_finder(rngstate, coords, tileset):
 
 def write_seed_output(file, seed_info, cloud_sets):
     file.write(seed_info)
-
     for i, clouds in enumerate(cloud_sets):
         file.write(f"{i+1}: ")
         for cloud in clouds:
             file.write(f"{cloud} ")
         file.write("\n")
-
     file.write("\n")
+
+def write_seed_output_excel(hour, minute, second, seed, offset, keypresses, first, second_cloud, check, remarks=""):
+    return {
+        "hour": hour,
+        "minute": minute,
+        "second": second,
+        "initial seed": hex(seed),
+        "offset": offset,
+        "keypresses": str(keypresses),
+        "First": str(first),
+        "Second": str(second_cloud),
+        "check": check,
+        "備考": remarks
+    }
 
 def multi_cloud(seed):
     success = 0
