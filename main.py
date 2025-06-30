@@ -59,19 +59,19 @@ def find_tepig_single_seed():
                             borderwidth=0)
     style.configure('TLabel', foreground='#FFF', background='#26242f', font=('Helvetica', 12, 'bold'))
 
-    seed = ""
-    ivframe = ""
-    month = ""
+    seed = tk.StringVar()
+    ivframe = tk.StringVar()
+    month = tk.StringVar()
 
     # ttk.Label(newWindow, text=f"{seed.seed}")
-    ttk.Label(newWindow, text="Tepig Seeed: ", justify="left").grid(row="0", column="0")
-    ttk.Label(newWindow, text="IV Frame: ", justify="left").grid(row="1", column="0")
+    ttk.Label(newWindow, text="Tepig Seed: ", justify="left").grid(row=0, column=0)
+    ttk.Label(newWindow, text="IV Frame: ", justify="left").grid(row=1, column=0)
 
     seed_entry = ttk.Entry(newWindow, textvariable=seed, justify='left')
-    seed_entry.grid(row="0", column="1")
+    seed_entry.grid(row=0, column=1)
     
     ivframe_entry = ttk.Entry(newWindow, textvariable=ivframe, justify="left")
-    ivframe_entry.grid(row="1", column="1")
+    ivframe_entry.grid(row=1, column=1)
 
     ttk.Label(newWindow, text="month").grid(row=2, column=0)
     month_entry = ttk.Entry(newWindow, textvariable=month, justify="center" )
@@ -80,7 +80,7 @@ def find_tepig_single_seed():
     results_text = tk.Text(newWindow)
     results_text.grid(row=6, column=1)
 
-    ttk.Button(newWindow, text="Run", command=lambda: process_tepig_seed_button_click(seed_entry.get(), ivframe_entry.get(), month_entry.get(), results_text)).grid(row="4", column="1", columnspan=3)
+    ttk.Button(newWindow, text="Run", command=lambda: process_tepig_seed_button_click(seed_entry.get(), ivframe_entry.get(), month_entry.get(), results_text)).grid(row=4, column=1, columnspan=3)
     
     newWindow.focus()
     newWindow.mainloop()
