@@ -5,6 +5,7 @@ from datetime import datetime
 from numba_pokemon_prngs.enums import Language, Game, DSType
 from trainer_skips import w2_thewholeskip, thewholeskip
 from trainer_skips.Parameters import parameters
+from trainer_skips.sharedfuncs import compute_times_tospring
 
 game_version_cb = None
 game_language = None
@@ -18,15 +19,43 @@ eMinute = None
 errText = None
 Twindow = None
 parameters_instance = None
+compute_time_spring_var = None  # チェックボックス用の変数
+
+def on_time_spring_checkbox_change():
+    """Time Springチェックボックスの状態変更時のコールバック"""
+    global eHour, eMinute, compute_time_spring_var
+    
+    if compute_time_spring_var.get():
+        # チェックボックスがオンになった場合、hourとminuteを無効化
+        eHour.config(state='disabled')
+        eMinute.config(state='disabled')
+        # Time Springの時間を表示
+        spring_times = compute_times_tospring()
+        if spring_times:
+            # 最初の時間を表示
+            hour, minute, second = spring_times[0]
+            eHour.config(state='normal')
+            eHour.delete(0, tk.END)
+            eHour.insert(0, str(hour))
+            eHour.config(state='disabled')
+            
+            eMinute.config(state='normal')
+            eMinute.delete(0, tk.END)
+            eMinute.insert(0, str(minute))
+            eMinute.config(state='disabled')
+    else:
+        # チェックボックスがオフになった場合、hourとminuteを有効化
+        eHour.config(state='normal')
+        eMinute.config(state='normal')
 
 def createTSkipWindow(window):
-    global game_version_cb, game_language, mac_addr, eYear, mCombo, domCombo, eTimer0, eHour, eMinute, errText, Twindow, parameters_instance
+    global game_version_cb, game_language, mac_addr, eYear, mCombo, domCombo, eTimer0, eHour, eMinute, errText, Twindow, parameters_instance, compute_time_spring_var
 
     Twindow = window
     parameters_instance = parameters()  # インスタンスを作成
 
     window.title("Trainer Skips")
-    window.geometry("500x550")
+    window.geometry("500x600")  # 高さを少し増やす
     style = ttk.Style(window)
     window.config(bg="#26242f")
     style.theme_use('clam')
@@ -35,6 +64,7 @@ def createTSkipWindow(window):
                             font=('Helvetica', 12, 'bold'),
                             borderwidth=0)
     style.configure('TLabel', foreground='#FFF', background='#26242f', font=('Helvetica', 12, 'bold'))
+    style.configure('TCheckbutton', foreground='#FFF', background='#26242f', font=('Helvetica', 12, 'bold'))
 
 
     #Game version 
@@ -96,6 +126,11 @@ def createTSkipWindow(window):
     eMinute.grid(row=8, column=1, padx=10, pady=10)
     eMinute.insert(0, "0")  # デフォルト値を設定
 
+    # Time Spring チェックボックス（Hour/Minuteの横に配置）
+    compute_time_spring_var = tk.BooleanVar()
+    compute_time_spring_cb = ttk.Checkbutton(window, text="Time Spring", variable=compute_time_spring_var, command=on_time_spring_checkbox_change)
+    compute_time_spring_cb.grid(row=7, column=2, rowspan=2, padx=10, pady=10, sticky="w")
+
     errText = tk.StringVar()
     errLabel = ttk.Label(window, textvariable=errText)
     errLabel.grid(row=9, column=1, padx=10, pady=10)
@@ -146,7 +181,7 @@ def mapLanguage(params, combo):
         raise ValueError(f"Unknown language: {language_name}")
 
 def run():
-    global errText, Twindow, eYear, mCombo, domCombo, mac_addr, eTimer0, eHour, eMinute, game_version_cb, game_language, parameters_instance
+    global errText, Twindow, eYear, mCombo, domCombo, mac_addr, eTimer0, eHour, eMinute, game_version_cb, game_language, parameters_instance, compute_time_spring_var
 
     try:
         outfile = filedialog.asksaveasfilename(initialfile="trainerskip.txt", defaultextension=".txt")
@@ -178,6 +213,24 @@ def run():
         if minute < 0 or minute > 59:
             errText.set("Minute must be between 0 and 59")
             return
+        
+        # Time Springの計算が有効な場合
+        if compute_time_spring_var.get():
+            try:
+                # sharedfuncsのcompute_times_tospring関数を使用
+                spring_times = compute_times_tospring()
+                # print(f"Time Spring times: {spring_times}")
+                # Time Springが有効な場合は、ユーザーの入力に関係なくTime Springの時間を使用
+                if spring_times:
+                    # 最初の時間を使用（または他の選択ロジック）
+                    hour, minute, second = spring_times[0]
+                    print(f"Using Time Spring time: {hour}:{minute}:{second}")
+                else:
+                    errText.set("No Time Spring times available")
+                    return
+            except Exception as e:
+                errText.set(f"Time Spring calculation error: {e}")
+                return
         
         # 曜日を自動計算
         parameters_instance.DOW = calculate_day_of_week(year, month, day)
@@ -221,6 +274,9 @@ def run():
     parameters_instance.Minute = minute
     parameters_instance.MAC = int(mac_addr.get(), 16)
     parameters_instance.Timer0Min = int(eTimer0.get(), 16)
+    
+    # Time Springフラグを設定
+    parameters_instance.use_time_spring = compute_time_spring_var.get()
 
     if game_version_cb.get() in ('Black', 'White'):
 

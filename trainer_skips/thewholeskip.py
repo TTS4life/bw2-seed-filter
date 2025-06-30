@@ -300,7 +300,16 @@ def main(parameters, outfile):
     user_hour = getattr(parameters, 'Hour', 23)
     user_minute = getattr(parameters, 'Minute', 30)
     
-    times = compute_times(user_hour, user_minute)
+    # Time Spring機能が有効かチェック
+    use_time_spring = getattr(parameters, 'use_time_spring', False)
+    
+    if use_time_spring:
+        # Time Springが有効な場合は、compute_times_tospringを使用
+        times = compute_times_tospring()
+        print("Using Time Spring times")
+    else:
+        # 通常の場合は、compute_timesを使用
+        times = compute_times(user_hour, user_minute)
 
     sha1 = SHA1(version = parameters.Version, 
                 language = parameters.Language, 
