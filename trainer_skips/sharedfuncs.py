@@ -19,20 +19,27 @@ def illegal_keypresses(keypresses):
 
 def compute_times(user_hour, user_min):
     times = []
-    for i in range(max(user_hour - 1, 0), min(user_hour + 1, 24)):
+    for i in range(max(user_hour - 2, 0), min(user_hour + 2, 24)):
         for j in range(max(user_min - 10, 0), min(user_min + 10, 60)):
            for k in range(5,7):
                   time1 = (i, j, k)
                   times.append(time1)
     return times
 
-def compute_times():
+def compute_times_whole():
     times = []
     for i in range(0, 24):
         for j in range(0, 60):
-            for k in range(5,7):
+            for k in range(5, 7):
                  times.append((i, j, k)) 
-    
+    return times
+
+def compute_times_tospring():
+    times = []
+    for i in range(23, 24):
+        for j in range(15, 40):
+            for k in range(5, 10):
+                 times.append((i, j, k)) 
     return times
 
 def rngAdvance(prev):

@@ -19,6 +19,9 @@ class parameters:
         self.Month = 1
         self.Day = 1
         self.DOW = 0
+        
+        self.Hour = 12
+        self.Minute = 0
 
     def setENGB1(self):
         self.VCount = 0x60

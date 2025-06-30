@@ -296,7 +296,11 @@ def wholeskip(outfile):
 def main(parameters, outfile):
     global sha1, precompute, times
 
-    times = compute_times()
+    # パラメータから時間を取得（デフォルト値を使用）
+    user_hour = getattr(parameters, 'Hour', 23)
+    user_minute = getattr(parameters, 'Minute', 30)
+    
+    times = compute_times(user_hour, user_minute)
 
     sha1 = SHA1(version = parameters.Version, 
                 language = parameters.Language, 

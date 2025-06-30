@@ -13,19 +13,20 @@ eYear = None
 mCombo = None 
 domCombo = None 
 eTimer0 = None
+eHour = None
+eMinute = None
 errText = None
 Twindow = None
 parameters_instance = None
 
 def createTSkipWindow(window):
-    global game_version_cb, game_language, mac_addr, eYear, mCombo, domCombo, eTimer0, errText, Twindow, parameters_instance
+    global game_version_cb, game_language, mac_addr, eYear, mCombo, domCombo, eTimer0, eHour, eMinute, errText, Twindow, parameters_instance
 
     Twindow = window
     parameters_instance = parameters()  # インスタンスを作成
 
     window.title("Trainer Skips")
-    window.geometry("500x400")
-
+    window.geometry("500x550")
     style = ttk.Style(window)
     window.config(bg="#26242f")
     style.theme_use('clam')
@@ -83,14 +84,25 @@ def createTSkipWindow(window):
     eTimer0 = ttk.Entry(window)
     eTimer0.grid(row=6, column=1, padx=10, pady=10)
     
+    #Hour
+    ttk.Label(window, text="Hour").grid(row=7, column=0, padx=10, pady=10)
+    eHour = ttk.Entry(window)
+    eHour.grid(row=7, column=1, padx=10, pady=10)
+    eHour.insert(0, "12")  # デフォルト値を設定
+    
+    #Minute
+    ttk.Label(window, text="Minute").grid(row=8, column=0, padx=10, pady=10)
+    eMinute = ttk.Entry(window)
+    eMinute.grid(row=8, column=1, padx=10, pady=10)
+    eMinute.insert(0, "0")  # デフォルト値を設定
 
     errText = tk.StringVar()
     errLabel = ttk.Label(window, textvariable=errText)
-    errLabel.grid(row=7, column=1, padx=10, pady=10)
+    errLabel.grid(row=9, column=1, padx=10, pady=10)
     errText.set("")
 
     runButton = ttk.Button(window, text="Run", command=run)
-    runButton.grid(row=8, column=1)
+    runButton.grid(row=10, column=1)
 
     window.mainloop()
 
@@ -134,7 +146,7 @@ def mapLanguage(params, combo):
         raise ValueError(f"Unknown language: {language_name}")
 
 def run():
-    global errText, Twindow, eYear, mCombo, domCombo, mac_addr, eTimer0, game_version_cb, game_language, parameters_instance
+    global errText, Twindow, eYear, mCombo, domCombo, mac_addr, eTimer0, eHour, eMinute, game_version_cb, game_language, parameters_instance
 
     try:
         outfile = filedialog.asksaveasfilename(initialfile="trainerskip.txt", defaultextension=".txt")
@@ -142,6 +154,7 @@ def run():
         return
 
     if(not eYear.get().isnumeric() or not mCombo.get().isnumeric() or not domCombo.get().isnumeric()
+      or not eHour.get().isnumeric() or not eMinute.get().isnumeric()
       # or not eTimer0.get().isnumeric() #or not mac_addr.get().isnumeric()
        ):
         print('bad input')
@@ -153,6 +166,18 @@ def run():
         year = int(eYear.get())
         month = int(mCombo.get())
         day = int(domCombo.get())
+        
+        # 時間を取得
+        hour = int(eHour.get())
+        minute = int(eMinute.get())
+        
+        # 時間の範囲をチェック
+        if hour < 0 or hour > 23:
+            errText.set("Hour must be between 0 and 23")
+            return
+        if minute < 0 or minute > 59:
+            errText.set("Minute must be between 0 and 59")
+            return
         
         # 曜日を自動計算
         parameters_instance.DOW = calculate_day_of_week(year, month, day)
@@ -192,6 +217,8 @@ def run():
     parameters_instance.Year = year
     parameters_instance.Month = month
     parameters_instance.Day = day
+    parameters_instance.Hour = hour
+    parameters_instance.Minute = minute
     parameters_instance.MAC = int(mac_addr.get(), 16)
     parameters_instance.Timer0Min = int(eTimer0.get(), 16)
 
