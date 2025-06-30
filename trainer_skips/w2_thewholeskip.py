@@ -141,27 +141,6 @@ usable_second_cloud_tiles = [(4,28), (5,28)]
 
 
 # Find all the good clouds on a seed up to PID Frame 500 (starts from initial frame)
-def multi_cloud(seed):
-    success = 0
-    clouds = []
-    cloud_states = []
-    first_skip_indices = []
-    second_skip_indices = []
-    third_skip_indices = []
-    fourth_skip_indices = []
-    for i in range(500):
-        seed = rngAdvance(seed)
-        temp = seed
-        if (((temp >> 32) * 1000) >> 32) < 100:
-            success += 1
-            clouds.append(i)
-            prev = rngRAdvance(temp)
-            # print("found cloud at", i, prev)
-            pair = [i, prev]
-            cloud_states.append(pair)
-
-            # [ [ All cloud frames ], [], [], ... [ cloud frame, frame seed ] ]
-    return [clouds, first_skip_indices, second_skip_indices, third_skip_indices, fourth_skip_indices, cloud_states]
 
 def seed_frame(seed):
     return seed, initial_frame_bw(seed)

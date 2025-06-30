@@ -128,3 +128,22 @@ def write_seed_output(file, seed_info, cloud_sets):
         file.write("\n")
 
     file.write("\n")
+
+def multi_cloud(seed):
+    success = 0
+    clouds = []
+    cloud_states = []
+    first_skip_indices = []
+    second_skip_indices = []
+    third_skip_indices = []
+    fourth_skip_indices = []
+    for i in range(500):
+        seed = rngAdvance(seed)
+        temp = seed
+        if (((temp >> 32) * 1000) >> 32) < 100:
+            success += 1
+            clouds.append(i)
+            prev = rngRAdvance(temp)
+            pair = [i, prev]
+            cloud_states.append(pair)
+    return [clouds, first_skip_indices, second_skip_indices, third_skip_indices, fourth_skip_indices, cloud_states]
