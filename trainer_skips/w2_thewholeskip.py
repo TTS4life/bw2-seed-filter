@@ -184,9 +184,8 @@ def skip_checker(states_array, frame):
             print("======")
             print (state_index)
 
-                # 170
-        if state_index < frame + 180 and state_index > (frame + 155): #and ((state_index - frame) % 2 == 0 --remove parity check for now
-            for first_coords in usable_first_skip_tiles: # reasonable tiles to step on to spawn cloud
+        if state_index < frame + 180 and state_index > (frame + 140):
+            for first_coords in usable_first_skip_tiles:
                 comparison_1, quadrant = cloud_location_finder(states[1], first_coords, valid_route21_tiles)
                 if comparison_1 != "No dust cloud" and (comparison_1 in usable_first_cloud_tiles):
                     # print("Frame ", str(state_index), " has a first skip ", first_coords, comparison_1, quadrant)
@@ -195,90 +194,80 @@ def skip_checker(states_array, frame):
                     one.append(pair_one)
                     continue
 
-
         for valid_first in one:
             first_frame = valid_first[0]
-                            # Need to make clouds like 120-130 from first cloud-ish
-            if state_index < first_frame + 200 and state_index > (first_frame + 130):    #450 - 260
+            if state_index < first_frame + 200 and state_index > (first_frame + 110):
                 for second_coords in usable_second_skip_tiles:
                     comp_2, quadrant = cloud_location_finder(states[1], second_coords, valid_seaside_tiles)
                     if(comp_2 != "No dust cloud" and (comp_2 in usable_second_cloud_tiles)):
-                        # print("Frame ", str(state_index), " has a second skip ", second_coords, comp_2, quadrant)
                         second = 1
                         two.append((state_index, second_coords))
                         continue
-                    # else: 
-                        # print("frame ", state_index, " spawn cloud ", comp_2, " from tile " , second_coords)
 
     comparison = [first, second]
 
     if comparison == [1,1]:  
-        if(len(two) > 1 and len(one) > 1):       # Make sure there's at least 2 phenomenon each
+        if(len(two) > 1):
             return True, one, two
 
     return False, [], []
 
 
 
-def wholeskip(outfile):
+def wholeskip(outfile, parameters):
     global sha1
 
-    file = open(outfile, "w")
+    file = open(outfile, "w", encoding="utf-8")
+    seeds_searched = 0
+    seeds_found = 0
 
-    for time in times:
-
-
-        for presses in keypresses:
+    for presses in keypresses:
+        for time in times:
             if illegal_keypresses(presses[1]):
                 continue
-            
-            
-            sha1.set_button(presses[0])
-            sha1.set_time(*time)
-            seed = sha1.hash_seed(precompute)
 
+            seed = generate_seed(
+                sha1,
+                np.uint32(presses[0]),
+                np.uint32(parameters.Timer0Min),
+                np.uint8(parameters.VCount),
+                (np.uint16(parameters.Year), np.uint8(parameters.Month), np.uint8(parameters.Day), np.uint8(parameters.DOW)),
+                (np.uint8(time[0]), np.uint8(time[1]), np.uint8(time[2]))
+            )
+
+            seeds_searched += 1
             ret = multi_cloud(seed)
-            cloud_states = ret[5] #[[frame, rng value of frame], ...]
+            cloud_states = ret[5]
             init = getInitialFrame(seed)
-
             valid_skip, first, second = skip_checker(cloud_states, init)
 
-            if valid_skip is True:
-                # print(time, hex(seed), init, presses[1], "first ", first, " second ", second)
-
+            if valid_skip:
                 seed_info = f"{time[0]}:{time[1]}:{time[2]} {hex(seed)} {init} {presses[1]}\n"
-
                 write_seed_output(file, seed_info, [first, second])
-                # output = f"{time[0]}:{time[1]}:{time[2]} {hex(seed)}\n {init} {presses[1]} \n first {len(first)} {first} \n second {len(second)} {second}\n\n"
-                
+                seeds_found += 1
 
+    file.write(f"\n Found {seeds_found} out of {seeds_searched} seeds")
     file.close()
+
 
 def main(parameters, outfile):
     global sha1, precompute, times
 
     print("initializing...")
     print("computing times...")
-
-    times = compute_times()
-
+    user_hour = getattr(parameters, 'Hour', 12)
+    user_minute = getattr(parameters, 'Minute', 0)
+    times = compute_times(user_hour, user_minute)
     print("generating RNG...")
-
-    sha1 = SHA1(version = parameters.Version, 
-                language = parameters.Language, 
-                ds_type = parameters.DSType, 
-                mac = parameters.MAC, 
-                soft_reset = False, 
-                v_frame = 8, 
-                gx_state = 6 )
-    
-    sha1.set_timer0(parameters.Timer0Min, parameters.VCount)
-    date = (parameters.Year, parameters.Month, parameters.Day, parameters.DOW)
-    sha1.set_date(*date)
-    precompute = sha1.precompute()
-
+    sha1 = SHA1(version = parameters.Version,
+                language = parameters.Language,
+                ds_type = parameters.DSType,
+                mac = np.uint64(parameters.MAC),
+                soft_reset = False,
+                v_frame = np.uint8(8),
+                gx_state = np.uint8(6))
     print("Searching...")
-    wholeskip(outfile)
+    wholeskip(outfile, parameters)
 
 def test_multicloud():
     clouds = multi_cloud(0x1111111111111111)
