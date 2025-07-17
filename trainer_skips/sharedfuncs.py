@@ -37,7 +37,7 @@ def compute_times_whole():
 def compute_times_tospring():
     times = []
     for i in range(23, 24):
-        for j in range(15, 40):
+        for j in range(15, 43):
             for k in range(5, 10):
                  times.append((i, j, k)) 
     return times
