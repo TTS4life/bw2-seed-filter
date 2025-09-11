@@ -1,0 +1,70 @@
+# -*- mode: python ; coding: utf-8 -*-
+
+block_cipher = None
+
+a = Analysis(
+    ['main.py'],
+    pathex=[],
+    binaries=[],
+    datas=[
+        ('kyurem-white.png', '.'),
+        ('drilbur.png', '.'),
+        ('file/*.py', 'file'),
+        ('snivy_generator/*.py', 'snivy_generator'),
+        ('trainer_skips/*.py', 'trainer_skips'),
+    ],
+    hiddenimports=[
+        'drilbur_filter',
+        'tepig_filter',
+        'trainer_skips.TSkipWindow',
+        'file.5GenFile',
+        'file.File',
+        'file.Pokefinderfile',
+        'file.SSS4',
+        'snivy_generator.keypresses',
+        'snivy_generator.PIDRNG',
+        'snivy_generator.snivy_generator',
+        'trainer_skips.keypress_generator',
+        'trainer_skips.keypresses',
+        'trainer_skips.Parameters',
+        'trainer_skips.sharedfuncs',
+        'trainer_skips.thewholeskip_cui',
+        'trainer_skips.thewholeskip',
+        'trainer_skips.TSkipWindow',
+        'trainer_skips.w2_thewholeskip_cui',
+        'trainer_skips.w2_thewholeskip',
+    ],
+    hookspath=[],
+    hooksconfig={},
+    runtime_hooks=[],
+    excludes=[],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=block_cipher,
+    noarchive=False,
+)
+
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+
+exe = EXE(
+    pyz,
+    a.scripts,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    [],
+    name='BW2_Seed_Filter',
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    runtime_tmpdir=None,
+    console=False,
+    disable_windowed_traceback=False,
+    argv_emulation=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
+    icon='kyurem-white.png',
+) 

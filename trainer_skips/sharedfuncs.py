@@ -19,20 +19,27 @@ def illegal_keypresses(keypresses):
 
 def compute_times(user_hour, user_min):
     times = []
-    for i in range(max(user_hour - 1, 0), min(user_hour + 1, 24)):
+    for i in range(max(user_hour - 2, 0), min(user_hour + 2, 24)):
         for j in range(max(user_min - 10, 0), min(user_min + 10, 60)):
            for k in range(5,7):
                   time1 = (i, j, k)
                   times.append(time1)
     return times
 
-def compute_times():
+def compute_times_whole():
     times = []
     for i in range(0, 24):
         for j in range(0, 60):
-            for k in range(5,7):
+            for k in range(5, 7):
                  times.append((i, j, k)) 
-    
+    return times
+
+def compute_times_tospring():
+    times = []
+    for i in range(23, 24):
+        for j in range(15, 43):
+            for k in range(5, 8):
+                 times.append((i, j, k)) 
     return times
 
 def rngAdvance(prev):
@@ -113,11 +120,42 @@ def cloud_location_finder(rngstate, coords, tileset):
 
 def write_seed_output(file, seed_info, cloud_sets):
     file.write(seed_info)
-
     for i, clouds in enumerate(cloud_sets):
         file.write(f"{i+1}: ")
         for cloud in clouds:
             file.write(f"{cloud} ")
         file.write("\n")
-
     file.write("\n")
+
+def write_seed_output_excel(hour, minute, second, seed, offset, keypresses, first, second_cloud, check, remarks=""):
+    return {
+        "hour": hour,
+        "minute": minute,
+        "second": second,
+        "initial seed": hex(seed),
+        "offset": offset,
+        "keypresses": str(keypresses),
+        "First": str(first),
+        "Second": str(second_cloud),
+        "check": check,
+        "備考": remarks
+    }
+
+def multi_cloud(seed):
+    success = 0
+    clouds = []
+    cloud_states = []
+    first_skip_indices = []
+    second_skip_indices = []
+    third_skip_indices = []
+    fourth_skip_indices = []
+    for i in range(500):
+        seed = rngAdvance(seed)
+        temp = seed
+        if (((temp >> 32) * 1000) >> 32) < 100:
+            success += 1
+            clouds.append(i)
+            prev = rngRAdvance(temp)
+            pair = [i, prev]
+            cloud_states.append(pair)
+    return [clouds, first_skip_indices, second_skip_indices, third_skip_indices, fourth_skip_indices, cloud_states]
