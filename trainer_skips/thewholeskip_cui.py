@@ -269,8 +269,8 @@ def skip_checker(states_array, initial_frame):
     
 
 times = []
-for i in range(9,14):
-    for j in range(0,30):
+for i in range(23,24):
+    for j in range(15,40):
            for k in range(5,7):
                   time1 = (i, j, k)
                   times.append(time1)
@@ -324,9 +324,9 @@ def main():
     
 
 
-    sha1 = SHA1(version = Game.WHITE, language = Language.JAPANESE, ds_type=DSType.DS, mac = user_mac, soft_reset=False, v_frame= 8, gx_state=6)
-    timer0 = 0xc69
-    sha1.set_timer0(timer0, 0x5f)
+    sha1 = SHA1(version = Game.BLACK, language = Language.JAPANESE, ds_type=DSType.DS, mac = user_mac, soft_reset=False, v_frame= 8, gx_state=6)
+    timer0 = 0xc7a
+    sha1.set_timer0(timer0, 0x60)
     date = (user_year, user_month, user_day, user_dow)
     sha1.set_date(*date)
     precompute = sha1.precompute()
