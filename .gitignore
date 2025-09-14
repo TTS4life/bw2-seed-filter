@@ -5,3 +5,6 @@ __pycache__
 *.txt
 venv
 dist/
+build/BW2_Seed_Filter/localpycs
+build/BW2_Seed_Filter/Analysis-00.toc
+build/BW2_Seed_Filter

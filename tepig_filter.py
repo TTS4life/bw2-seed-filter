@@ -4,15 +4,24 @@ import tkinter as tk
 from tkinter import ttk
 from typing import Optional
 from file.SSS4 import SSS4 as TepigFileSSS4
-
-dir = os.getcwd()
-path = dir+"/result.txt"
+from file.Pokefinderfile import PokefinderFile
 
 frame_entering_route20 = 430
-frame_exiting_route20 = 530
-frame_entering_ranch = 480
-frame_exiting_ranch = 620
+frame_exiting_route20 = 490
+frame_entering_ranch = 550
+frame_exiting_ranch = 615
+frame_min_for_candy = 360
+frame_max_for_candy = 440
 
+min_tepig_nature = 215
+max_tepig_nature = 275
+
+nature_search = "Rash"
+
+#grotto stuff
+grotto_filled = [0] * 20
+grotto_subslot = [0] * 20
+grotto_slot = [0] * 20
 
 def rngAdvance(prev):
 	next=0x5D588B656C078965 * prev + 0x0000000000269EC3
@@ -23,6 +32,9 @@ def rngOf(seed,frame):
 	for x in range(0,frame):
 		prev=rngAdvance(prev)
 	return prev
+
+def rand(seed, max):
+	return ((seed) >> 32) * max  >> 32
 
 natures=['Hardy','Lonely','Brave','Adamant','Naughty','Bold','Docile','Relaxed','Impish','Lax','Timid','Hasty','Serious','Jolly','Naive','Modest','Mild','Quiet','Bashful','Rash','Calm','Gentle','Sassy','Careful','Quirky']
 
@@ -148,6 +160,109 @@ def get_init_frame_id(seed, challenge_mode = False):
 
 	return count
 
+
+def rand_to_slot(rand):
+	if(rand == 0):
+		return 0
+	if(rand <= 4):
+		return 1
+	if(rand <= 19):
+		return 2
+	if(rand == 20):
+		return 3
+	if(rand <=24):
+		return 4
+	if(rand <= 34):
+		return 5
+	if(rand <=59):
+		return 6
+	if(rand == 60):
+		return 7
+	if(rand <= 64):
+		return 8
+	if(rand <=74):
+		return 9
+	if(rand <= 99):
+		return 10
+	
+	return 11
+
+
+def clear_grottos():
+	global grotto_slot, grotto_filled, grotto_slot, grotto_subslot
+	grotto_filled = [False] * 20
+	grotto_subslot = [0] * 20
+	grotto_slot = [0] * 20
+
+
+#There are 4 total advancements done during grotto check,
+# but since idc about checking gender and whatnot, ignoring for now
+def grottos_fill(seed):
+	global grotto_filled, grotto_subslot, grotto_slot
+	#There are 20 grottos, but for route 6 candy we only care about Route 6 which is index 3 of 0->20
+	for i in range (0, 20): 
+		if(grotto_filled[i] == False):
+			seed = rngAdvance(seed)
+			r = getUInt(seed, 100)
+			if(r < 5):
+				grotto_filled[i] = True
+				seed = rngAdvance(seed)
+				grotto_subslot[i] = getUInt(seed, 4)
+				seed = rngAdvance(seed)
+				grotto_slot[i] = rand_to_slot(getUInt(seed, 100))
+				# print("grotto ", i, " got filled with ", str(grotto_subslot[i]), str(grotto_slot[i]))
+
+
+def has_candy(grotto_index):
+	if(grotto_filled[grotto_index] is True):
+		if(grotto_subslot[grotto_index] == 0 and grotto_slot[grotto_index] == 7):
+			return True
+	return False
+
+def tepig_ability_check(seed):
+	global nature_search
+	nature_frames = []
+	rng = seed
+	rng = rngOf(rng, min_tepig_nature)
+	# -1 is to match RNG Reporter output
+	for i in range(min_tepig_nature - 1, max_tepig_nature):
+		natsel = rand(rng, 25)
+		if(natures[natsel] == nature_search):
+			nature_frames.append(i)
+		rng = rngAdvance(rng)
+		
+	return nature_frames
+	
+
+def has_dragonite_and_zangoose():
+	global grotto_filled, grotto_slot, grotto_subslot
+
+	if(grotto_filled[19] is True and grotto_filled[11] is True):
+		if(grotto_slot[19] == 0 ): #Dnite is all 4 slots
+			if(grotto_subslot[11] in [0, 1] and grotto_slot[11] == 2 ):
+				return True
+	
+	return False
+
+
+def grotto_check(seed):
+	seed = rngOf(seed, frame_min_for_candy)
+	candy_frames = []
+
+	#The 3 is to make the frames align with what they actually are in game,
+	#Not sure where I am actually missing advancements here
+	for i in range(frame_min_for_candy + 3, frame_max_for_candy):
+		clear_grottos()
+		#Attempt to fill grottos on current RNG seed
+		grottos_fill(seed)
+		#Check R6 grotto for candy
+		if(has_dragonite_and_zangoose()):
+			candy_frames.append(i)
+
+		seed = rngAdvance(seed)
+
+	return candy_frames
+
 def processSeed(input_seed, ivframe, month):
 	print(f"seed: {input_seed}, ivframe: {ivframe}")
 
@@ -168,7 +283,7 @@ def processSeed(input_seed, ivframe, month):
 		seed["ducks"] = getDucks(seed)
 		seed["birds"] = getBirds(seed)
 
-		print("formatting output for " + str(seed))
+		# print("formatting output for " + str(seed))
 		output = format_output(seed)
 
 	except Exception as ex:
@@ -179,21 +294,36 @@ def processSeed(input_seed, ivframe, month):
 
 
 def processFile(input_file, output_file):
+	global nature_search
 
-	print("Instantiating SSS4 wtih file ", input_file)
-	file = TepigFileSSS4(input_file)
+	# print("Instantiating SSS4 wtih file ", input_file)
+	file = PokefinderFile(input_file)
 	if not file.open():
 		print("failure to open file")
 		exit()
 
 	output = open(output_file, "w", encoding="UTF-8")
 
+	seeds = []
+
 	while (seed := file.parseLine()):
 
-		seed["NMTID"] = getTID(seed["seed"], seed["ivframe"])
+		if seed["seed"] in seeds:
+			# print("skipping dupe seed")
+			continue
+
+		seeds.append(seed["seed"])
+		
+		seed["TEPIG_INFO"] = tepig_ability_check(seed["seed"])
+		
+		# seed["R6GROTTO"] = grotto_check(seed["seed"])
+		# if(len(seed["R6GROTTO"]) < 1):
+		# 	continue
+
+		seed["NMTID"] = getTID(seed["seed"], int(seed["ivframe"]))
 		seed["NMPASS"] = getPassword(seed["NMTID"])
 
-		seed["CMTID"] = getTID(seed["seed"], seed["ivframe"], True)
+		seed["CMTID"] = getTID(seed["seed"], int(seed["ivframe"]), True)
 		seed["CMPASS"] = getPassword(seed["CMTID"])
 
 		seed["ducks"] = getDucks(seed)
@@ -201,23 +331,26 @@ def processFile(input_file, output_file):
 		
 		if len(seed["birds"]) == 0 or len(seed["ducks"]) == 0:
 			continue
-		#婵?闂?闂?闂?闂?缂?Timer0,婵犵數鍋為崹鐢告偋閹邦厾鈻旂€广儱顦弸?H,A,B,C,D,S,闂備線娼ч悧鍛存⒔瀹ュ棛顩烽煫鍥ㄧ☉鍞?濠电姷鏁搁崑妯肩矆娴ｈ鍙?闂備礁鎲＄敮妤冩崲閸愵煉鑰挎い锛勵劋ed,闂備線娼ч悧婊堝储瑜版帒绀傛俊銈呮噹缁€鍌炴煏婢跺牆鍔氭い?
+		
 		output.write("Seed: " + str(hex(seed["seed"]))+"\n")
-		output.write("Time: "+ str(seed["year"]) +"/"+ str(seed["month"]) + "/" + str(seed["day"]) +" "+"{:02d}".format(int(seed["hour"]))+":"+"{:02d}".format(int(seed["minute"]))+":"+"{:02d}".format(int(seed["second"]))+"\n")
-		output.write("Timer0: "+seed["timer0"]+"\n")
-		output.write("Key Presses: "+seed["key_presses"]+"\n")
+		output.write(f"Time: {seed['date']}\n")
+		output.write(f"Timer0: {hex(seed["timer0"])}\n")
+		output.write("Key Presses: "+seed["keypresses"])
 		output.write(f"TID: {seed['NMTID']} ({seed['NMPASS']}), CM: {seed['CMTID']} ({seed['CMPASS']})\n")
 		output.write("Tepig:"+"\n")
-		output.write(str(seed["ivframe"])+" "+str([parsed[8],parsed[9],parsed[10],parsed[11],parsed[12],parsed[13]])+"\n")
+		output.write(f"{seed["ivframe"]} {seed["stats"]}\n")
+		output.write(f"{nature_search} Frames: {seed["TEPIG_INFO"]}\n")
 		for x in seed["birds"]:
 			output.write(x+"\n")
 		for y in seed["ducks"]:
 			output.write(y+"\n")
+		if("R6GROTTO" in seed and len(seed["R6GROTTO"]) > 0):
+			output.write(f"DNite/Zangoose frame: {seed['R6GROTTO']}\n")
 		output.write("\n\n")
 	file.close()
 	output.close()
 
-	print("Finished!")
+	print(f"Analyzed {len(seeds)} seeds")
 
 def format_output(seed):
 	

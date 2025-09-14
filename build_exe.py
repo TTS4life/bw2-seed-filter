@@ -14,12 +14,14 @@ def build_exe():
     # specファイルが存在する場合はそれを使用
     if os.path.exists("BW2_Seed_Filter.spec"):
         print("specファイルを使用してビルドします...")
-        cmd = ["pyinstaller", "BW2_Seed_Filter.spec"]
+        cmd = [sys.executable, "-m", "PyInstaller", "BW2_Seed_Filter.spec"]
     else:
         print("specファイルが見つからないため、基本的な設定でビルドします...")
         # 基本的なPyInstallerコマンド
         cmd = [
-            "pyinstaller",
+            sys.executable,
+            "-m"
+            "PyInstaller",
             "--onefile",  # 単一のexeファイルにまとめる
             "--windowed",  # コンソールウィンドウを表示しない
             "--name=BW2_Seed_Filter",  # exeファイルの名前
@@ -33,8 +35,8 @@ def build_exe():
         ]
         
         # アイコンファイルが存在する場合は追加
-        if os.path.exists("kyurem-white.png"):
-            cmd.extend(["--icon=kyurem-white.png"])
+        # if os.path.exists("kyurem-white.png"):
+            # cmd.extend(["--icon=kyurem-white.png"])
     
     try:
         subprocess.check_call(cmd)
