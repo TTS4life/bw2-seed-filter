@@ -142,9 +142,11 @@ def main(infile, outfile):
             else:
                 output.write("Seed: "+ hex(seed['seed']) +"\n")
                 output.write(f"Time: {seed['date']}\n")
-                output.write(f"Timer0: {seed['timer0']}\n")
-                output.write(f"Keypresses: {seed['keypresses']}")
+                output.write(f"Timer0: {hex(seed['timer0'])}\n")
+                output.write(f"Keypresses: {seed['keypresses']}\n")
                 output.write(f"IVs: {seed['stats']} \n")
+                output.write(f"Ability: {seed['ability']}\n")
+                output.write(f"Gender: {seed['gender']}\n")
                 output.write(f"Initial PIDRNG Frame: {seed['init']}\n")
                 output.write("Dust Clouds: ")
                 for x in dusts:
