@@ -44,7 +44,7 @@ class PokefinderFile(File):
             "ivframe": int(parsed[1]),
             "timer0": int(parsed[-2], 16),
             "date": parsed [-3],
-            "stats": parsed[2:7],
+            "stats": [ parsed[7], parsed[8], parsed[9], parsed[10], parsed[11], parsed[12] ],
             "gender": parsed[-5],
             "keypresses": parsed[-2],
             "month": int(date[1]),
