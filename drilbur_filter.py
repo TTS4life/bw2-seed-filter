@@ -1,14 +1,7 @@
 from file.Pokefinderfile import PokefinderFile
+from file.FiveGenFile import FiveGenSearchFile
 
-def rngAdvance(prev):
-	next=0x5D588B656C078965 * prev + 0x0000000000269EC3
-	return next%0x10000000000000000
-
-def rngOf(seed,frame):
-	prev=seed
-	for x in range(0,frame):
-		prev=rngAdvance(prev)
-	return prev
+from rng.util import *
 
 natures=['Hardy','Lonely','Brave','Adamant','Naughty','Bold','Docile','Relaxed','Impish','Lax','Timid','Hasty','Serious','Jolly','Naive','Modest','Mild','Quiet','Bashful','Rash','Calm','Gentle','Sassy','Careful','Quirky']
 badDates=[[],[3,4,5,11,12,13,20,21,27,28,29],[],[4,5,12,13,20,21,28,29],[1,2,3,4,5,9,10,11,13,14,18,19,20,21,22,25,28,30],[3,4,5,11,12,13,20,21,27,28,29],[],[4,5,12,13,20,21,28,29],[1,2,3,5,8,9,10,11,14,18,19,21,22,25,28,30,31],[3,4,5,11,12,13,20,21,27,28,29],[],[4,5,12,13,20,21,28,29],[1,2,3,5,8,9,11,14,18,21,22,25,28,30,31]]
@@ -106,7 +99,8 @@ def dustSearch(seed,min,max):
 
 def main(infile, outfile):
     
-    data = PokefinderFile(infile)
+    # data = PokefinderFile(infile)
+    data = FiveGenSearchFile(infile)
     data.open()
     seeds_analyzed = []
 

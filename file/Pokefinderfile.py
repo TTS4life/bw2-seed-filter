@@ -4,7 +4,6 @@ import re
 class PokefinderFile(File):
     def __init__(self, filename):
       super().__init__(filename)
-      self.seeds = []
       self.static = False
 
     def open(self):
@@ -14,7 +13,7 @@ class PokefinderFile(File):
         
         #Static searches have diff columns than Wild
         static_check = header_line.split("\t")[3]
-        print(static_check)
+        # print(static_check)
         if static_check == "PID":
            self.static = True
 
@@ -32,7 +31,7 @@ class PokefinderFile(File):
 
         parsed = data.split("\t")
 
-        print(parsed)
+        # print(parsed)
         date = re.findall(r'\d+', parsed[-3])
 
         print(date)
