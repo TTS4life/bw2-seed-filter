@@ -62,9 +62,13 @@ def createTSkipWindow(window):
     style.configure('TButton', foreground='#FFF', 
                             background='#333', 
                             font=('Helvetica', 12, 'bold'),
-                            borderwidth=0)
+                            borderwidth=0,)
     style.configure('TLabel', foreground='#FFF', background='#26242f', font=('Helvetica', 12, 'bold'))
-    style.configure('TCheckbutton', foreground='#FFF', background='#26242f', font=('Helvetica', 12, 'bold'))
+    style.configure('TCheckbutton', foreground='#FFF', background='#26242f', font=('Helvetica', 12, 'bold'), indicatormargin=4, highlightthickness=0, borderwidth=0)
+
+    style.map("TCheckbutton",
+          background=[('active', '#26242f')],
+          foreground=[('active', '#FFF')])
 
 
     #Game version 
@@ -128,16 +132,16 @@ def createTSkipWindow(window):
 
     # Time Spring チェックボックス（Hour/Minuteの横に配置）
     compute_time_spring_var = tk.BooleanVar()
-    compute_time_spring_cb = ttk.Checkbutton(window, text="Time Spring", variable=compute_time_spring_var, command=on_time_spring_checkbox_change)
-    compute_time_spring_cb.grid(row=7, column=2, rowspan=2, padx=10, pady=10, sticky="w")
+    compute_time_spring_cb = ttk.Checkbutton(window, text="Spring Date Rollover (BW1 Only)", variable=compute_time_spring_var, command=on_time_spring_checkbox_change)
+    compute_time_spring_cb.grid(row=9, column=1, rowspan=2, padx=10, pady=10)
 
     errText = tk.StringVar()
     errLabel = ttk.Label(window, textvariable=errText)
-    errLabel.grid(row=9, column=1, padx=10, pady=10)
+    errLabel.grid(row=10, column=1, padx=10, pady=10)
     errText.set("")
 
     runButton = ttk.Button(window, text="Run", command=run)
-    runButton.grid(row=10, column=1)
+    runButton.grid(row=11, column=1)
 
     window.mainloop()
 

@@ -52,3 +52,9 @@ class parameters:
         self.Timer0Min = 0x10F7
         self.timer0Max = 0x10FB
 
+    def setENGW1(self):
+        self.VCount = 0x60
+        self.GxStat = 0x6
+        self.Timer0Max = 0xc80
+        self.timer0Min = 0xc7f
+

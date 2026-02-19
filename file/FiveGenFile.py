@@ -4,8 +4,9 @@ from rng.util import rngAdvance
 class FiveGenSearchFile(File):
 
     def parseLine(self):
-        data = super().parseLine()
+        data = super().parseLine().strip()
 
+        # print(data)
         if data == "":
             return False
         

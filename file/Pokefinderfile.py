@@ -34,18 +34,17 @@ class PokefinderFile(File):
         # print(parsed)
         date = re.findall(r'\d+', parsed[-3])
 
-        print(date)
         if self.static:
           print("Static File")
 
           seed = {
             "seed": int(parsed[0], 16),
-            "ivframe": int(parsed[1]),
+            "ivframe": int(parsed[2]),
             "timer0": int(parsed[-2], 16),
             "date": parsed [-3],
             "stats": [ parsed[7], parsed[8], parsed[9], parsed[10], parsed[11], parsed[12] ],
             "gender": parsed[-5],
-            "keypresses": parsed[-2],
+            "keypresses": parsed[-1],
             "month": int(date[1]),
             "day": int(date[2]),
             "second": int(date[-1]),
