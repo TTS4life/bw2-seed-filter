@@ -15,12 +15,6 @@ from ui.GenericForm import GenericForm
 from ui.styles import configure_app_styles
 
 
-
-
-
-
-
-
 def create_button_grid(parent, buttons_data, columns=2, start_row=0, uniform_weight=True, **grid_kwargs):
     buttons = []
 

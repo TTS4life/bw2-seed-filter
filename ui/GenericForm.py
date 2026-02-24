@@ -17,6 +17,50 @@ class GenericForm(ttk.Frame):
         self._create_widgets()
         self._layout_widgets()
 
+    def apply_styles(self):
+        """Apply consistent styles to form widgets"""
+        # Style the form frame itself
+        self.configure(style='Main.TFrame')
+        
+        # Style title
+        if hasattr(self, 'title_label'):
+            self.title_label.configure(style='Heading.TLabel')
+        
+        # Style all field labels
+        for child in self.winfo_children():
+            if isinstance(child, ttk.Label) and child != self.title_label:
+                child.configure(style='Main.TLabel')
+        
+        # Style entry widgets
+        for field_def in self.fields_def:
+            widget = self.field_widgets.get(field_def.name)
+            if widget:
+                if field_def.field_type == 'text' and isinstance(widget, ttk.Entry):
+                    widget.configure(style='Form.TEntry')
+                elif field_def.field_type == 'dropdown' and isinstance(widget, ttk.Combobox):
+                    widget.configure(style='Form.TCombobox')
+        
+        # Style buttons
+        if hasattr(self, 'submit_btn'):
+            self.submit_btn.configure(style='Primary.TButton')
+        if hasattr(self, 'cancel_btn'):
+            self.cancel_btn.configure(style='Secondary.TButton')
+        
+        # Style error labels
+        for error_label in self.error_labels.values():
+            error_label.configure(style='Error.TLabel')
+
+
+        def create_styled_message(self, message: str, message_type: str = 'error'):
+            """Create a styled message label"""
+            style = 'Error.TLabel' if message_type == 'error' else 'Success.TLabel'
+        
+            if hasattr(self, 'message_label'):
+                self.message_label.configure(text=message, style=style)
+            else:
+                self.message_label = ttk.Label(self, text=message, style=style)
+                self.message_label.grid(row=100, column=0, columnspan=3, pady=10)
+
     def _create_widgets(self):
         self.title_label = ttk.Label(self, text=self.title, font=('Arial', 14, 'bold'))
 
@@ -50,9 +94,6 @@ class GenericForm(ttk.Frame):
             self.field_widgets[field_def.name] = widget
             self.error_labels[field_def.name] = error_label
 
-        self.submit_btn = ttk.Button(self, text="Run", command=self._on_submit)
-
-
         if hasattr(self, 'worker_selector'):
             self.worker_selector = None
 
@@ -85,7 +126,9 @@ class GenericForm(ttk.Frame):
         button_frame = ttk.Frame(self)
         button_frame.grid(row=row, column=0, columnspan=3, pady=(20, 0))
 
-        # self.submit_btn.pack(side=tk.RIGHT)
+        self.run_btn = ttk.Button(button_frame, text="Run", command=self._on_submit, style="Primary.TButton")
+
+        self.run_btn.pack(side=tk.LEFT, padx=5)
 
         self.grid_columnconfigure(1, weight=1)
 
@@ -100,6 +143,7 @@ class GenericForm(ttk.Frame):
 
     
     def _validate_field(self, field_def: FieldDefinition, value: Any) -> tuple[bool, str]:
+        # print(f"VALIDATING {field_def.name} value {value}")
         if field_def.required:
             if value is None or (isinstance(value, str) and not value.strip()):
                 return False, f"{field_def.label} is required"
@@ -120,7 +164,7 @@ class GenericForm(ttk.Frame):
             if field_def.field_type == 'checkbox':
                 value = widget.get()
             elif field_def.field_type in ['text', 'dropdown']:
-                value = widget.get().strip
+                value = widget.get().strip()
             else:
                 value = widget.get()
 
@@ -133,6 +177,8 @@ class GenericForm(ttk.Frame):
             form_data.fields[field_def.name] = value
 
         form_data.is_valid = is_valid
+
+        print(f"Form Valid? {is_valid}")
         return form_data
     
     def _display_errors(self, errors: Dict[str, str]):

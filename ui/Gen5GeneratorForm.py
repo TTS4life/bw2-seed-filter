@@ -4,6 +4,7 @@ from numba_pokemon_prngs.enums import Game, Language, DSType
 from .FormController import FormController
 from tkinter import ttk
 import tkinter as tk
+from .FormValidators import Validators
 
 GAME_MAPPING = {
     "Black": Game.BLACK,
@@ -37,23 +38,62 @@ class Gen5GeneratorForm(GenericForm):
                 options=["English", "Japanese"],
                 default="English",
                 required=True
+            ),
+            FieldDefinition(
+                name="timer0",
+                label="Timer0",
+                field_type="text",
+                required=True,
+                validator=Validators.is_hex
+            ),
+            FieldDefinition(
+                name="month",
+                label="Month",
+                field_type="dropdown",
+                options=[1,2,3,4,5,6,7,8,9,10,11,12],
+                default=1,
+                required=True,
+            ),
+            FieldDefinition(
+                name="day",
+                label="Day",
+                field_type="dropdown",
+                options=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31],
+                required=True
+            ),
+            FieldDefinition(
+                name="year",
+                label="Year",
+                field_type="text",
+                default="2000",
+                required=True,
+                validator=Validators.valid_ds_year,
+            ),
+            FieldDefinition(
+                name="mac",
+                label="Mac Address",
+                field_type="text",
+                validator=Validators.is_hex,
+                required=True
+            ),
+            FieldDefinition(
+                name="hour",
+                label="Hour",
+                field_type="text",
+                validator=Validators.valid_hour,
+                required=True
+            ),
+            FieldDefinition(
+                name="minute",
+                label="Minute",
+                field_type="text",
+                required=True,
+                validator=Validators.valid_minute_or_second
             )
         ]
         controller = FormController(window)
-        
-        window.config(bg="#26242f")
-        style.theme_use('clam')
-        style.configure('TButton', foreground='#FFF', 
-                                background='#333', 
-                                font=('Helvetica', 12, 'bold'),
-                                borderwidth=0,)
-        style.configure('TLabel', foreground='#FFF', background='#26242f', font=('Helvetica', 12, 'bold'))
-        style.configure('TCheckbutton', foreground='#FFF', background='#26242f', font=('Helvetica', 12, 'bold'), indicatormargin=4, highlightthickness=0, borderwidth=0)
 
-        style.map("TCheckbutton",
-            background=[('active', '#26242f')],
-            foreground=[('active', '#FFF')])
-        form = controller.create_form("Generic Test", fields)
+        form = controller.create_form("Trainer Skips", fields)
 
 
 
