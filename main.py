@@ -114,6 +114,32 @@ def process_tepig_seed_button_click(seed, ivframe, month, results_text):
     print("Done")
     return
 
+def create_button_grid(parent, buttons_data, columns=2, start_row=0, uniform_weight=True, **grid_kwargs):
+    buttons = []
+
+    if 'sticky' not in grid_kwargs:
+        grid_kwargs['sticky'] = 'ew'
+
+    for col in range(0, columns):
+        parent.grid_columnconfigure(col, weight=1, uniform='button_cols' if uniform_weight else None)
+
+    for i, button_config in enumerate(buttons_data):
+        row = start_row + (i // columns)
+        col = i % columns
+
+        button = ttk.Button(parent, **button_config)
+
+        button.grid(row=row, column=col, padx=10, pady=5, **grid_kwargs)
+        buttons.append(button)
+
+    total_rows = (len(buttons_data) + columns - 1) // columns
+    # for row in range(start_row, start_row + total_rows):
+        # parent.grid_rowconfigure(row, weight=1)
+    for col in range(columns):
+        parent.grid_rowconfigure(col, weight=1)
+
+    return buttons
+
 root = tk.Tk()
 
 root.title("BW/BW2 Seed Filter")
@@ -137,34 +163,51 @@ style.configure('TLabel', foreground='#FFF', background='#26242f', font=('Helvet
 file_label = ttk.Label(root, text=get_file_label_text())             
 
 browse_button = ttk.Button(root, text="Browse", command=browse_file)
-drilbur_button = ttk.Button(root, text="Drilbur Filter", command=find_drilbur)
-tepig_button = ttk.Button(root, text="Tepig Filter", command=find_tepig)
-tepig_seed_button = ttk.Button(root, text="View Tepig Seed", command=find_tepig_single_seed)
-pup_seed_button = ttk.Button(root, text="Lillipup Filter", command=find_pups)
+
+
+filter_buttons = [
+    {"text": "Drilbur Filter", "command": find_drilbur},
+    {"text": "Tepig Filter", "command": find_tepig},
+    {"text": "Lilliipup Filter", "command": find_pups},
+    {"text": "View Tepig Seed", "command": find_tepig_single_seed},
+]
+
+
+
+
+# drilbur_button = ttk.Button(root, text="Drilbur Filter", command=find_drilbur)
+# tepig_button = ttk.Button(root, text="Tepig Filter", command=find_tepig)
+# tepig_seed_button = ttk.Button(root, text="View Tepig Seed", command=find_tepig_single_seed)
+# pup_seed_button = ttk.Button(root, text="Lillipup Filter", command=find_pups)
 trainer_skip_button = ttk.Button(root, text="Trainer Skip Generator", command=trainerSkips)
+
+
 
 
 step1 = ttk.Label(text="Step 1: Choose File to load: ")
 step1.grid(row=0, column=0, columnspan=3, padx=10, pady=10)
 
-file_label.grid(row=1, column=1, columnspan=3, padx=10, pady=10)
+file_label.grid(row=1, column=0, columnspan=3, padx=10, pady=10)
 browse_button.grid(row=2, column=0, columnspan=3, padx=10, pady=10)
+
+root.grid_columnconfigure(0, weight=1)
+root.grid_columnconfigure(1, weight=1)
+root.grid_columnconfigure(2, weight=1)
+
 
 step2 = ttk.Label(text="Step 2: Filter File as: ")
 step2.grid(row=3, column=0, columnspan=3, padx=10, pady=10)
 
-drilbur_button.grid(row=4, column=1, padx=10, pady=10)
-tepig_button.grid(row=4, column=2, padx=10, pady=10)
-tepig_seed_button.grid(row=5, column=2, padx=10, pady=10)
-pup_seed_button.grid(row=5, column=1, padx=10, pady=10)
+buttons = create_button_grid(root, filter_buttons, columns = 2, start_row=4, sticky='ew')
+# drilbur_button.grid(row=4, column=1, padx=10, pady=10)
+# tepig_button.grid(row=4, column=2, padx=10, pady=10)
+# tepig_seed_button.grid(row=5, column=2, padx=10, pady=10)
+# pup_seed_button.grid(row=5, column=1, padx=10, pady=10)
 
 misc_tools = ttk.Label(text="Miscellaneous tools/Generators")
 misc_tools.grid(row=6, column=0, columnspan=3, padx=10, pady=10)
 
 trainer_skip_button.grid(row=7, column=1, padx=10, pady=10)
 
-root.grid_columnconfigure(0, weight=1)
-root.grid_columnconfigure(1, weight=1)
-root.grid_columnconfigure(2, weight=1)
 
 root.mainloop()
