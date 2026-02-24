@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
-from FieldData import FieldDefinition, DataWorker
-from types import List, Dict, Optional, Any
-from GenericForm import GenericForm
+from .FieldData import FieldDefinition, DataWorker
+from typing import List, Dict, Optional, Any
+from .GenericForm import GenericForm
 
 class FormController:
     def __init__(self, root):
