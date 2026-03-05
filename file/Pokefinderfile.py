@@ -43,7 +43,7 @@ class PokefinderFile(File):
             "timer0": int(parsed[-2], 16),
             "date": parsed [-3],
             "stats": [ parsed[7], parsed[8], parsed[9], parsed[10], parsed[11], parsed[12] ],
-            "gender": parsed[-5],
+            "gender": parsed[-4],
             "keypresses": parsed[-1],
             "month": int(date[1]),
             "day": int(date[2]),
@@ -67,6 +67,6 @@ class PokefinderFile(File):
             "date": parsed[-3],
            }
 
-        print(seed)
+        # print(seed)
 
         return seed

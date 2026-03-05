@@ -14,9 +14,9 @@ frame_min_for_candy = 360
 frame_max_for_candy = 440
 
 min_tepig_nature = 215
-max_tepig_nature = 275
+max_tepig_nature = 280
 
-nature_search = "Rash"
+nature_search = "Naughty"
 
 #grotto stuff
 grotto_filled = [0] * 20
@@ -61,34 +61,40 @@ def pokeGen(seed,frame):
 	return [appear,frame,isEncounter,getLandSlot(sel),natures[natsel],ability]
 
 def getBirds(seed):
-	table1 = ["lv2 pidove","lv2 sewaddle","lv3 patrat", "lv3 purrloin", "lv3 patrat", "lv3 sewaddle", "lv4 pidove", "lv4 sewaddle", "lv4 purrloin", "lv3 sunkern", "lv4 sunkern", "lv4 sunkern"]
-	table3 = ["lv2 pidove","lv2 sewaddle","lv3 patrat", "lv3 purrloin", "lv3 patrat", "lv3 sewaddle", "lv4 pidove", "lv4 sewaddle", "lv4 purrloin", "lv4 sunkern", "lv4 purrloin", "lv4 sunkern"]
+
+	r20_encounter_table = {	
+		# 0 - spring
+		0: ["lv2 pidove","lv2 sewaddle","lv3 patrat", "lv3 purrloin", "lv3 patrat", "lv3 sewaddle", "lv4 pidove", "lv4 sewaddle", "lv4 purrloin", "lv3 sunkern", "lv4 sunkern", "lv4 sunkern"],
+		1: ["lv2 sunkern","lv2 sewaddle","lv3 patrat", "lv3 purrloin", "lv3 patrat", "lv3 sewaddle", "lv4 pidove", "lv4 sewaddle", "lv4 purrloin", "lv3 sunkern", "lv4 sunkern", "lv4 sunkern"],
+		2: ["lv2 pidove","lv2 sewaddle","lv3 patrat", "lv3 purrloin", "lv3 patrat", "lv3 sewaddle", "lv4 pidove", "lv4 sewaddle", "lv4 purrloin", "lv3 sunkern", "lv4 sunkern", "lv4 sunkern"],
+		3: ["lv2 pidove","lv2 sewaddle","lv3 patrat", "lv3 purrloin", "lv3 patrat", "lv3 sewaddle", "lv4 pidove", "lv4 sewaddle", "lv4 purrloin", "lv3 sunkern", "lv4 sunkern", "lv4 sunkern"]
+	}
+	
 	birds  = [ ]
+	
+	
 	for x in range(frame_entering_route20,frame_exiting_route20):
 		res = pokeGen(seed["seed"], x)
-		if res[0] and res[3]==0 or res[3] == 6 and res[4] not in [natures[1],natures[11],natures[16],natures[21]]:
-			if seed["month"] % 4 == 3:
-				if res[2]<5:
-					birds.append(str(res[1])+"\t"+table3[int(res[3])]+"\t"+res[4]+"\t"+str(res[5])+" Low")
-				else:
-					birds.append(str(res[1])+"\t"+table3[int(res[3])]+"\t"+res[4]+"\t"+str(res[5])+" High")
-			if seed["month"] %4 == 1:
-				if res[2]<5:
-					birds.append(str(res[1])+"\t"+table1[int(res[3])]+"\t"+res[4]+"\t"+str(res[5])+" Low")
-				else:
-					birds.append(str(res[1])+"\t"+table1[int(res[3])]+"\t"+res[4]+"\t"+str(res[5])+" High")
+		if (res[0] #Encounterable
+			and "pidove" in r20_encounter_table[seed["month"] % 4][res[3]] #Enc slot is Pidove  
+			and res[4] not in [natures[1],natures[11],natures[16],natures[21]] #Nature isn't -def
+			): 
+			birds.append(f"{x}\t{r20_encounter_table[seed["month"] % 4][res[3]]}\t{res[4]}\t{'Low' if res[2] < 5 else 'High'}")
+
+	# print(birds)
 	return birds
 
 def getDucks(seed):
-	table2 = ["lv4 lillipup","lv5 azurill","lv5 patrat", "lv5 mareep", "lv5 lillipup", "lv5 psyduck", "lv6 lillipup", "lv7 pidove", "lv5 riolu", "lv7 lillpup", "lv7 riolu", "lv7 lillipup"]
+	ranch_enc_slots = ["lv4 lillipup","lv5 azurill","lv5 patrat", "lv5 mareep", "lv5 lillipup", "lv5 psyduck", "lv6 lillipup", "lv7 pidove", "lv5 riolu", "lv7 lillpup", "lv7 riolu", "lv7 lillipup"]
 	ducks=[]
 	for x in range(frame_entering_ranch,frame_exiting_ranch):
 		res = pokeGen(seed["seed"], x)
-		if res[0] and res[3]==5 and res[5]==0:
-			if res[2]<5:
-				ducks.append(str(res[1])+"\t"+table2[int(res[3])]+"\t"+res[4]+"\t"+str(res[5])+" Low")
-			else:
-				ducks.append(str(res[1])+"\t"+table2[int(res[3])]+"\t"+res[4]+"\t"+str(res[5])+" High")
+		if (res[0] 									 #Encounterable 
+	  		and "psyduck" in ranch_enc_slots[res[3]] #It's a Psyduck 
+	  		and res[5]==0):							 #It's ability is Damp
+			
+			ducks.append(f"{x}\t{ranch_enc_slots[res[3]]}\t{res[4]}\t{'Low' if res[2] < 5 else 'High'}")
+	# print(ducks)
 	return ducks
 
 def getTID(seed, ivframe, challenge_mode = False):
@@ -256,7 +262,7 @@ def grotto_check(seed):
 		#Attempt to fill grottos on current RNG seed
 		grottos_fill(seed)
 		#Check R6 grotto for candy
-		if(has_dragonite_and_zangoose()):
+		if(has_candy(3)):
 			candy_frames.append(i)
 
 		seed = rngAdvance(seed)
@@ -309,14 +315,14 @@ def processFile(input_file, output_file):
 	while (seed := file.parseLine()):
 
 		if seed["seed"] in seeds:
-			# print("skipping dupe seed")
+			print("skipping dupe seed")
 			continue
 
 		seeds.append(seed["seed"])
 		
 		seed["TEPIG_INFO"] = tepig_ability_check(seed["seed"])
 		
-		# seed["R6GROTTO"] = grotto_check(seed["seed"])
+		seed["R6GROTTO"] = grotto_check(seed["seed"])
 		# if(len(seed["R6GROTTO"]) < 1):
 		# 	continue
 
@@ -330,12 +336,13 @@ def processFile(input_file, output_file):
 		seed["birds"] = getBirds(seed)
 		
 		if len(seed["birds"]) == 0 or len(seed["ducks"]) == 0:
+			print("NO ducks/birds ", len(seeds))
 			continue
 		
 		output.write("Seed: " + str(hex(seed["seed"]))+"\n")
 		output.write(f"Time: {seed['date']}\n")
 		output.write(f"Timer0: {hex(seed["timer0"])}\n")
-		output.write("Key Presses: "+seed["keypresses"])
+		output.write(f"Key Presses: {seed["keypresses"]}\n")
 		output.write(f"TID: {seed['NMTID']} ({seed['NMPASS']}), CM: {seed['CMTID']} ({seed['CMPASS']})\n")
 		output.write("Tepig:"+"\n")
 		output.write(f"{seed["ivframe"]} {seed["stats"]}\n")
@@ -345,7 +352,7 @@ def processFile(input_file, output_file):
 		for y in seed["ducks"]:
 			output.write(y+"\n")
 		if("R6GROTTO" in seed and len(seed["R6GROTTO"]) > 0):
-			output.write(f"DNite/Zangoose frame: {seed['R6GROTTO']}\n")
+			output.write(f"Candy frame: {seed['R6GROTTO']}\n")
 		output.write("\n\n")
 	file.close()
 	output.close()

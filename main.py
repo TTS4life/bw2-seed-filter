@@ -86,7 +86,7 @@ def main():
     def find_pups():
         global full_path
         output_file = prompt_save_file()
-        pups.main(selected_file, output_file)
+        pups.main(full_path, output_file)
 
     def find_tepig_single_seed():
         newWindow = tk.Toplevel()
