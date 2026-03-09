@@ -17,6 +17,14 @@ class Gen5GeneratorForm(GenericForm):
 
         fields = [
             FieldDefinition(
+                name="dstype",
+                label="DS Type",
+                field_type="dropdown",
+                required=True,
+                options=["DS", "DSi", "3DS"],
+                default="DS"
+            ),
+            FieldDefinition(
                 name="version",
                 label="Version",
                 field_type="dropdown",

@@ -19,18 +19,9 @@ else:
 
 # from trainer_skips import Parameters
 
-test = False
-user_year = None
-user_month = None
-user_day = None    
-user_dow = None
-user_mac = None
-user_keypress = None
 sha1 = None
 precompute = None
 times = []
-
-debug = False
 
 valid_route21_tiles = {                               (4,214), (4,213), (4,212), (4,211), (4,210), (4,209), (4,208), 
                            (5,217), (5,216), (5,215), (5,214), (5,213), (5,212), (5,211), (5,210), (5,209), (5,208),
@@ -133,9 +124,9 @@ def wholeskip(parameters):
             seed = generate_seed(
                 sha1,
                 np.uint32(presses[0]),
-                np.uint32(parameters.Timer0Min),
-                np.uint8(parameters.VCount),
-                (np.uint16(parameters.Year), np.uint8(parameters.Month), np.uint8(parameters.Day), np.uint8(parameters.DOW)),
+                np.uint32(parameters["timer0"]),
+                np.uint8(parameters["vcount"]),
+                (np.uint16(parameters["year"]), np.uint8(parameters["month"]), np.uint8(parameters["day"]), np.uint8(parameters["dow"])),
                 (np.uint8(time[0]), np.uint8(time[1]), np.uint8(time[2]))
             )
 
@@ -162,14 +153,12 @@ def main(parameters):
 
     print("initializing...")
     print("computing times...")
-    user_hour = getattr(parameters, 'Hour', 12)
-    user_minute = getattr(parameters, 'Minute', 0)
-    times = compute_times(user_hour, user_minute)
+    times = compute_times(parameters["minute"], parameters["minute"])
     print("generating RNG...")
-    sha1 = SHA1(version = parameters.Version,
+    sha1 = SHA1(version = convert_version(parameters["version"]),
                 language = parameters.Language,
-                ds_type = parameters.DSType,
-                mac = np.uint64(parameters.MAC),
+                ds_type = convert_dstype(parameters["dstype"]),
+                mac = np.uint64(parameters["mac"]),
                 soft_reset = False,
                 v_frame = np.uint8(8),
                 gx_state = np.uint8(6))
@@ -193,5 +182,20 @@ def test():
     print(hex(seed), one, two)
 
 
-if __name__ == '__main__':
-    test()
+def convert_version(version):
+    if version == "White 2":
+        return Game.WHITE2
+    if version == "Black 2":
+        return Game.BLACK2
+    if version == "Black":
+        return Game.BLACK
+    if version == "White":
+        return Game.WHITE
+    
+def convert_dstype(dstype):
+    if dstype == "DS":
+        return DSType.DS
+    if dstype == "DSi":
+        return DSType.DSI
+    if dstype == "3DS":
+        return DSType.DS3
