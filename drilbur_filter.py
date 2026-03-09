@@ -1,9 +1,8 @@
 from file.Pokefinderfile import PokefinderFile
 from file.FiveGenFile import FiveGenSearchFile
 
-from rng.util import *
+from rng.util import Gen5RNG
 
-natures=['Hardy','Lonely','Brave','Adamant','Naughty','Bold','Docile','Relaxed','Impish','Lax','Timid','Hasty','Serious','Jolly','Naive','Modest','Mild','Quiet','Bashful','Rash','Calm','Gentle','Sassy','Careful','Quirky']
 badDates=[[],[3,4,5,11,12,13,20,21,27,28,29],[],[4,5,12,13,20,21,28,29],[1,2,3,4,5,9,10,11,13,14,18,19,20,21,22,25,28,30],[3,4,5,11,12,13,20,21,27,28,29],[],[4,5,12,13,20,21,28,29],[1,2,3,5,8,9,10,11,14,18,19,21,22,25,28,30,31],[3,4,5,11,12,13,20,21,27,28,29],[],[4,5,12,13,20,21,28,29],[1,2,3,5,8,9,11,14,18,21,22,25,28,30,31]]
 def getLandSlot(sel):
     parts=[20, 40, 50, 60, 70, 80, 85, 90, 94, 98, 99, 100]
@@ -12,12 +11,12 @@ def getLandSlot(sel):
             return x
 
 def dustGen(seed,frame):
-    trigger = rngOf(seed,frame+2)
-    slot = rngAdvance(trigger)
-    slot = rngAdvance(slot)
-    ability = rngAdvance(slot)
-    ability = rngAdvance(ability)
-    pokenat = rngAdvance(ability)
+    trigger = Gen5RNG.rngOf(seed,frame+2)
+    slot = Gen5RNG.rngAdvance(trigger)
+    slot = Gen5RNG.rngAdvance(slot)
+    ability = Gen5RNG.rngAdvance(slot)
+    ability = Gen5RNG.rngAdvance(ability)
+    pokenat = Gen5RNG.rngAdvance(ability)
     isEncounter = int((((trigger>>32)*1000)>>32))
     if isEncounter < 400:
         appear = True
@@ -28,7 +27,7 @@ def dustGen(seed,frame):
     id = ability>>32^0x10000^0x80000000
     ability = id>>16&1
     gender = (id&255)
-    return [appear,frame,isEncounter,getLandSlot(sel),natures[natsel],ability,gender]
+    return [appear,frame,isEncounter,getLandSlot(sel),Gen5RNG.natures[natsel],ability,gender]
 
 def drilSearch(seed,min,max):
     drills=[]
@@ -48,7 +47,7 @@ def getInitialFrame(seed):
                 if ptable[y][z] == 100:
                     break
                 fc+=1
-                seed=rngAdvance(seed)
+                seed=Gen5RNG.rngAdvance(seed)
                 rng = seed>>32
                 rng = rng*101
                 rng = rng>>32
@@ -58,7 +57,7 @@ def getInitialFrame(seed):
             adv = 3
             for j in range (0,adv):
                 fc+=1
-                seed = rngAdvance(seed)
+                seed = Gen5RNG.rngAdvance(seed)
     fc = extra(seed,fc)
     return fc
 
@@ -73,7 +72,7 @@ def extra(seed,fc):
         tmp = [0,0,0]
         fc+=3
         for x in range (0,3):
-            seed = rngAdvance(seed)
+            seed = Gen5RNG.rngAdvance(seed)
             rng = seed>>32
             rng = rng*15
             rng = rng>>32
@@ -90,10 +89,10 @@ def extra(seed,fc):
 
 def dustSearch(seed,min,max):
     clouds = []
-    rng = rngOf(seed,min-1)
+    rng = Gen5RNG.rngOf(seed,min-1)
     for x in range(min,max+1):
-        rng = rngAdvance(rng)
-        if ((rng >> 32)  * 1000) >> 32 < 100:
+        rng = Gen5RNG.rngAdvance(rng)
+        if Gen5RNG.getUInt(rng) < 100:
             clouds.append(x)
     return clouds
 

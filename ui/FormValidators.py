@@ -31,7 +31,7 @@ class Validators:
     @staticmethod
     def valid_ds_year(value: str) -> tuple[bool, str]:
         try:
-            int(value)
+            value = int(value)
             if value >= 2000 and value <= 2099:
                 return True, ""
             return False, "Number must be between 2000 and 2099."
@@ -41,7 +41,7 @@ class Validators:
     @staticmethod
     def valid_hour(value: str) -> tuple[bool, str]:
         try:
-            int(value)
+            value = int(value)
             if value <= 24 and value >= 0:
                 return True, ""
             return False, "Value must be between 0 and 24."
@@ -52,7 +52,7 @@ class Validators:
 
     def valid_minute_or_second(value: str) -> tuple[bool, str]:
         try:
-            int(value)
+            value = int(value)
             if value <= 60 and value >= 0:
                 return True, ""
             return False, "Value must be between 0 and 60"

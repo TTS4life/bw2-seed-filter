@@ -5,6 +5,7 @@ from tkinter import ttk
 from typing import Optional
 from file.SSS4 import SSS4 as TepigFileSSS4
 from file.Pokefinderfile import PokefinderFile
+from rng.util import Gen5RNG
 
 frame_entering_route20 = 430
 frame_exiting_route20 = 490
@@ -23,43 +24,6 @@ grotto_filled = [0] * 20
 grotto_subslot = [0] * 20
 grotto_slot = [0] * 20
 
-def rngAdvance(prev):
-	next=0x5D588B656C078965 * prev + 0x0000000000269EC3
-	return next%0x10000000000000000
-
-def rngOf(seed,frame):
-	prev=seed
-	for x in range(0,frame):
-		prev=rngAdvance(prev)
-	return prev
-
-def rand(seed, max):
-	return ((seed) >> 32) * max  >> 32
-
-natures=['Hardy','Lonely','Brave','Adamant','Naughty','Bold','Docile','Relaxed','Impish','Lax','Timid','Hasty','Serious','Jolly','Naive','Modest','Mild','Quiet','Bashful','Rash','Calm','Gentle','Sassy','Careful','Quirky']
-
-def getLandSlot(sel):
-    parts=[20, 40, 50, 60, 70, 80, 85, 90, 94, 98, 99, 100]
-    for x in range(0,12):
-        if sel<parts[x]:
-            return x
-
-def pokeGen(seed,frame):
-	trigger = rngOf(seed,frame+2)
-	slot = rngAdvance(trigger)
-	ability = rngAdvance(slot)
-	ability = rngAdvance(ability)
-	pokenat = rngAdvance(ability)
-	isEncounter = int((((trigger>>32)*0xFFFF)>>32)/0x290)
-	if isEncounter <20:
-		appear = True
-	else:
-		appear = False
-	sel =((slot>>32)*100)>>32
-	natsel = ((pokenat>>32)*25)>>32
-	ability = ((ability>>32^0x10000^0x80000000)>>16)&1
-	return [appear,frame,isEncounter,getLandSlot(sel),natures[natsel],ability]
-
 def getBirds(seed):
 
 	r20_encounter_table = {	
@@ -74,10 +38,10 @@ def getBirds(seed):
 	
 	
 	for x in range(frame_entering_route20,frame_exiting_route20):
-		res = pokeGen(seed["seed"], x)
+		res = Gen5RNG.pokeGen(seed["seed"], x)
 		if (res[0] #Encounterable
 			and "pidove" in r20_encounter_table[seed["month"] % 4][res[3]] #Enc slot is Pidove  
-			and res[4] not in [natures[1],natures[11],natures[16],natures[21]] #Nature isn't -def
+			and res[4] not in [Gen5RNG.natures[1],Gen5RNG.natures[11],Gen5RNG.natures[16],Gen5RNG.natures[21]] #Nature isn't -def
 			): 
 			birds.append(f"{x}\t{r20_encounter_table[seed["month"] % 4][res[3]]}\t{res[4]}\t{'Low' if res[2] < 5 else 'High'}")
 
@@ -88,7 +52,7 @@ def getDucks(seed):
 	ranch_enc_slots = ["lv4 lillipup","lv5 azurill","lv5 patrat", "lv5 mareep", "lv5 lillipup", "lv5 psyduck", "lv6 lillipup", "lv7 pidove", "lv5 riolu", "lv7 lillpup", "lv7 riolu", "lv7 lillipup"]
 	ducks=[]
 	for x in range(frame_entering_ranch,frame_exiting_ranch):
-		res = pokeGen(seed["seed"], x)
+		res = Gen5RNG.pokeGen(seed["seed"], x)
 		if (res[0] 									 #Encounterable 
 	  		and "psyduck" in ranch_enc_slots[res[3]] #It's a Psyduck 
 	  		and res[5]==0):							 #It's ability is Damp
@@ -101,7 +65,7 @@ def getTID(seed, ivframe, challenge_mode = False):
 	
 	initial_frame = get_init_frame_id(seed, challenge_mode)
 	extra_advances = ivframe - 14 # 1 extra advancement is always made from init_frame for TID 
-	tmp = rngOf(seed, initial_frame + extra_advances) 
+	tmp = Gen5RNG.rngOf(seed, initial_frame + extra_advances) 
 	rand = ((tmp >> 32) * 0xffffffff) >> 32
 	tid = rand & 0xffff
 	sid = rand >> 16
@@ -120,49 +84,49 @@ def get_init_frame_id(seed, challenge_mode = False):
 	for i in range(0, 3):
 		# Round 1
 		count += 1
-		seed = rngOf(seed, 1)
+		seed = Gen5RNG.rngOf(seed, 1)
 
 		# Round 2
 		count += 1
-		seed = rngAdvance(seed)
+		seed = Gen5RNG.rngAdvance(seed)
 		if ( getUInt(seed, 101) > 50):
 			count += 1
-			seed = rngOf(seed, 1)
+			seed = Gen5RNG.rngOf(seed, 1)
 
 		# Round 3
 		count += 1
-		seed = rngAdvance(seed)
+		seed = Gen5RNG.rngAdvance(seed)
 		if (getUInt(seed, 101) > 30):    
 			count += 1
-			seed = rngOf(seed, 1)
+			seed = Gen5RNG.rngOf(seed, 1)
 
 		# Round 4
 		count += 1
-		seed = rngAdvance(seed) 
+		seed = Gen5RNG.rngAdvance(seed) 
 		if (getUInt(seed, 101) > 25):
 			count += 1
-			seed = rngAdvance(seed)
+			seed = Gen5RNG.rngAdvance(seed)
 			if (getUInt(seed, 101) > 30):
 				count += 1
-				seed = rngOf(seed, 1)
+				seed = Gen5RNG.rngOf(seed, 1)
 
 		# Round 5
 		count += 1
-		seed = rngAdvance(seed)
+		seed = Gen5RNG.rngAdvance(seed)
 		if (getUInt(seed, 101) > 20):
 			count += 1
-			seed = rngAdvance(seed) 
+			seed = Gen5RNG.rngAdvance(seed) 
 			if (getUInt(seed, 101) > 25):
 				count += 1
-				seed = rngAdvance(seed)
+				seed = Gen5RNG.rngAdvance(seed)
 				if (getUInt(seed, 101) > 33):
 					count += 1
-					seed = rngOf(seed, 1)
+					seed = Gen5RNG.rngOf(seed, 1)
 
 		if( i == 0 ):
-			seed = rngOf(seed, 1 if challenge_mode else 2)
+			seed = Gen5RNG.rngOf(seed, 1 if challenge_mode else 2)
 		elif (i == 1):
-			seed = rngOf(seed, 2 if challenge_mode else 4)
+			seed = Gen5RNG.rngOf(seed, 2 if challenge_mode else 4)
 
 	return count
 
@@ -208,13 +172,13 @@ def grottos_fill(seed):
 	#There are 20 grottos, but for route 6 candy we only care about Route 6 which is index 3 of 0->20
 	for i in range (0, 20): 
 		if(grotto_filled[i] == False):
-			seed = rngAdvance(seed)
+			seed = Gen5RNG.rngAdvance(seed)
 			r = getUInt(seed, 100)
 			if(r < 5):
 				grotto_filled[i] = True
-				seed = rngAdvance(seed)
+				seed = Gen5RNG.rngAdvance(seed)
 				grotto_subslot[i] = getUInt(seed, 4)
-				seed = rngAdvance(seed)
+				seed = Gen5RNG.rngAdvance(seed)
 				grotto_slot[i] = rand_to_slot(getUInt(seed, 100))
 				# print("grotto ", i, " got filled with ", str(grotto_subslot[i]), str(grotto_slot[i]))
 
@@ -229,13 +193,13 @@ def tepig_ability_check(seed):
 	global nature_search
 	nature_frames = []
 	rng = seed
-	rng = rngOf(rng, min_tepig_nature)
+	rng = Gen5RNG.rngOf(rng, min_tepig_nature)
 	# -1 is to match RNG Reporter output
 	for i in range(min_tepig_nature - 1, max_tepig_nature):
-		natsel = rand(rng, 25)
-		if(natures[natsel] == nature_search):
+		natsel = Gen5RNG.getUInt(rng, 25)
+		if(Gen5RNG.natures[natsel] == nature_search):
 			nature_frames.append(i)
-		rng = rngAdvance(rng)
+		rng = Gen5RNG.rngAdvance(rng)
 		
 	return nature_frames
 	
@@ -252,7 +216,7 @@ def has_dragonite_and_zangoose():
 
 
 def grotto_check(seed):
-	seed = rngOf(seed, frame_min_for_candy)
+	seed = Gen5RNG.rngOf(seed, frame_min_for_candy)
 	candy_frames = []
 
 	#The 3 is to make the frames align with what they actually are in game,
@@ -265,7 +229,7 @@ def grotto_check(seed):
 		if(has_candy(3)):
 			candy_frames.append(i)
 
-		seed = rngAdvance(seed)
+		seed = Gen5RNG.rngAdvance(seed)
 
 	return candy_frames
 

@@ -2,6 +2,7 @@ from numba_pokemon_prngs.lcrng import BWRNG
 import numpy as np
 from numba_pokemon_prngs.sha1 import SHA1
 from numba_pokemon_prngs.enums import Language, Game, DSType
+from rng.util import Gen5RNG
 
 test = False
 
@@ -13,8 +14,6 @@ ranges = (
     (-5, 5, 0, 5) #below player
 )
 
-def illegal_keypresses(keypresses):
-    return ( 'Up' in keypresses and 'Down' in keypresses ) or ( 'Left' in keypresses and 'Right' in keypresses )
 
 
 def compute_times(user_hour, user_min):
@@ -42,13 +41,6 @@ def compute_times_tospring():
                  times.append((i, j, k)) 
     return times
 
-def rngAdvance(prev):
-	next=0x5D588B656C078965 * prev + 0x0000000000269EC3
-	return next % 0x10000000000000000
-
-def rngRAdvance(prev):
-    next = 0xdedcedae9638806d * prev + 0x9b1ae6e9a384e6f9
-    return next % 0x10000000000000000
 
 def generate_seed(
         sha1: SHA1,
@@ -150,7 +142,7 @@ def multi_cloud(seed):
     third_skip_indices = []
     fourth_skip_indices = []
     for i in range(500):
-        seed = rngAdvance(seed)
+        seed = Gen5RNG.rngAdvance(seed)
         temp = seed
         if (((temp >> 32) * 1000) >> 32) < 100:
             success += 1

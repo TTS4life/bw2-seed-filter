@@ -10,9 +10,12 @@ import pandas as pd
 if __name__ == '__main__':
     from keypresses import *
     from sharedfuncs import *
+    from ..rng.util import Gen5RNG
 else:
     from trainer_skips.keypresses import *
     from trainer_skips.sharedfuncs import * 
+    from rng.util import Gen5RNG, illegal_keypresses
+
 
 # from trainer_skips import Parameters
 
@@ -55,76 +58,6 @@ valid_seaside_tiles = {(2,28),
 
 table = [[50, 100, 100, 100], [50, 50, 100, 100], [30, 50, 100, 100],[25, 30, 50, 100], [20, 25, 33, 50]]
 
-def advance_table(prng):
-    count = 0
-
-    for i in range(5):
-        for j in range(4):
-            if table[i][j] == 100:
-                break
-
-            count += 1
-            prng = rngAdvance(prng)
-            rand = ((prng >> 32) * 101) >> 32
-            if rand <= table[i][j]:
-                break
-
-    return prng, count
-
-def initial_frame_bw(prng):
-    count = 0
-
-    for i in range(5):
-        prng, num = advance_table(prng)
-        count += num
-
-    return count
-
-ptable = [[50,100,100,100,100],[50,50,100,100,100],[30,50,100,100,100],[25,30,50,100,100],[20,25,33,50,100],[100,100,100,100,100]]
-
-def getInitialFrame(seed):
-    fc = 0
-    for x in range (0,5):
-        for y in range(0,6):
-            for z in range (0,5):
-                if ptable[y][z] == 100:
-                    break
-                fc+=1
-                seed=rngAdvance(seed)
-                rng = seed>>32
-                rng = rng*101
-                rng = rng>>32
-                if rng <= ptable[y][z]:
-                    break
-        if x == 0:
-            adv = 3
-            for j in range (0,adv):
-                fc+=1
-                seed = rngAdvance(seed)
-    fc = extra(seed,fc)
-    return fc
-
-def extra(seed,fc):
-    loop = True
-    limit = 0
-    while loop and limit<100:
-        loop = False
-        tmp = [0,0,0]
-        fc+=3
-        for x in range (0,3):
-            seed = rngAdvance(seed)
-            rng = seed>>32
-            rng = rng*15
-            rng = rng>>32
-            tmp[x] = rng
-        for i in range (0,3):
-            for j in range (0,3):
-                if i==j:
-                    continue
-                if tmp[i] == tmp[j]:
-                    loop = True
-        limit+=1
-    return fc
 
 # below are fast tiles      #(4,213)
 usable_first_skip_tiles = [(6,213)]
@@ -136,15 +69,6 @@ usable_second_skip_tiles = [ (4,26), (6,26), (5,27), (6,23), (5,24), (4,23)]
 usable_first_cloud_tiles = [(5,214)]
 usable_second_cloud_tiles = [(4,28), (5,28)]
 #usable_third_cloud_tiles = [(53, 13), (53, 14)]
-
-
-
-
-
-# Find all the good clouds on a seed up to PID Frame 500 (starts from initial frame)
-
-def seed_frame(seed):
-    return seed, initial_frame_bw(seed)
 
 
 #[[frame, rng value of frame], ..., initial frame of seed]
@@ -194,7 +118,7 @@ def skip_checker(states_array, frame):
 
 
 
-def wholeskip(outfile_xlsx, parameters):
+def wholeskip(parameters):
     global sha1
 
     results = []
@@ -218,7 +142,7 @@ def wholeskip(outfile_xlsx, parameters):
             seeds_searched += 1
             ret = multi_cloud(seed)
             cloud_states = ret[5]
-            init = getInitialFrame(seed)
+            init = Gen5RNG.getInitialFrame(seed)
             valid_skip, first, second = skip_checker(cloud_states, init)
 
             if valid_skip:
@@ -229,11 +153,11 @@ def wholeskip(outfile_xlsx, parameters):
                 seeds_found += 1
 
     df = pd.DataFrame(results)
-    df.to_excel(outfile_xlsx, index=False)
+    df.to_excel(parameters["output_file"], index=False)
     print(f"\n Found {seeds_found} out of {seeds_searched} seeds")
 
 
-def main(parameters, outfile_xlsx):
+def main(parameters):
     global sha1, precompute, times
 
     print("initializing...")
@@ -250,7 +174,7 @@ def main(parameters, outfile_xlsx):
                 v_frame = np.uint8(8),
                 gx_state = np.uint8(6))
     print("Searching...")
-    wholeskip(outfile_xlsx, parameters)
+    wholeskip(parameters)
 
 def test_multicloud():
     clouds = multi_cloud(0x1111111111111111)
@@ -263,7 +187,7 @@ def test():
     seed =  0x33960b0a8db0e38f
     ret = multi_cloud(seed)
     cloud_states = ret[5]
-    init = getInitialFrame(seed)
+    init = Gen5RNG.getInitialFrame(seed)
     print("Initial frame:", init)
     valid_skip, one, two = skip_checker(cloud_states, init)
     print(hex(seed), one, two)
@@ -271,4 +195,3 @@ def test():
 
 if __name__ == '__main__':
     test()
-

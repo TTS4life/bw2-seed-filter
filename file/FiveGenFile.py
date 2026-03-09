@@ -1,5 +1,5 @@
 from file.File import File
-from rng.util import rngAdvance
+from rng.util import Gen5RNG
 
 class FiveGenSearchFile(File):
 
@@ -13,7 +13,7 @@ class FiveGenSearchFile(File):
         parsed = data.split("\t")
 
         seed = {
-            "seed": rngAdvance(int(parsed[0], 16)),
+            "seed": Gen5RNG.rngAdvance(int(parsed[0], 16)), #5Gen searches with the seed 1 below actual
             "keypresses": parsed[19].strip(),
             "date": parsed[1] + "/"+parsed[2]+"/"+parsed[3]+" "+"{:02d}".format(int(parsed[4]))+":"+"{:02d}".format(int(parsed[5]))+":"+"{:02d}".format(int(parsed[6])),
             "month": parsed[2],

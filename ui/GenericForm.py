@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import filedialog
+
 from .FieldData import FieldDefinition, DataWorker, FormData
+
 from typing import List, Optional, Dict, Any
 
 class GenericForm(ttk.Frame):
@@ -139,7 +142,11 @@ class GenericForm(ttk.Frame):
         if form_data.is_valid:
             self._clear_errors()
 
+            #Prompt and add save location to fields for the worker
+            form_data.fields.update(output_file=filedialog.asksaveasfilename())
+
             #Worker stuff here
+            self.worker.process(form_data)
 
     
     def _validate_field(self, field_def: FieldDefinition, value: Any) -> tuple[bool, str]:

@@ -1,17 +1,10 @@
 from .GenericForm import GenericForm
 from .FieldData import FieldDefinition
-from numba_pokemon_prngs.enums import Game, Language, DSType
 from .FormController import FormController
 from tkinter import ttk
 import tkinter as tk
 from .FormValidators import Validators
-
-GAME_MAPPING = {
-    "Black": Game.BLACK,
-    "White": Game.WHITE,
-    "Black 2": Game.BLACK2,
-    "White 2": Game.WHITE2
-}
+from trainer_skips.TrainerSkipWorker import TrainerSkipWorkerHandler
 
 
 class Gen5GeneratorForm(GenericForm):
@@ -93,7 +86,7 @@ class Gen5GeneratorForm(GenericForm):
         ]
         controller = FormController(window)
 
-        form = controller.create_form("Trainer Skips", fields)
+        form = controller.create_form("Trainer Skips", fields, TrainerSkipWorkerHandler())
 
 
 
